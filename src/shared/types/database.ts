@@ -1,4 +1,4 @@
-// Master Entity Types
+
 export interface MasterItem {
   id: string;
   name: string;
@@ -18,7 +18,7 @@ export interface BudgetRange extends MasterItem {
   description?: string;
 }
 
-// Frame Entity (Relational Dynamic)
+// --- FRAME TYPES ---
 export interface Frame {
   id: string;
   name: string;
@@ -29,13 +29,22 @@ export interface Frame {
   stock: number;
   image_url: string;
   created_at?: string;
-  // Dynamic relation objects (saat di-join query)
   category?: MasterItem;
   material?: MasterItem;
   authenticity?: AuthenticityTag;
 }
 
-// Lens Brand & Matrix Types
+export interface CreateFramePayload {
+  name: string;
+  category_id: string;
+  material_id: string;
+  authenticity_id: string;
+  price: number;
+  stock: number;
+  image_url: string;
+}
+
+// --- LENS MATRIX TYPES ---
 export interface LensBrand {
   id: string;
   name: string;
@@ -58,13 +67,23 @@ export interface BrandLensType {
 export interface BrandLensIndex {
   id: string;
   brand_id: string;
-  index_value: string; // e.g., '1.56', '1.61', '1.67'
+  index_value: string;
   price_adder: number;
-  rec_sph_min: number;
-  rec_sph_max: number;
-  rec_cyl_max: number;
+  rec_sph_min?: number;
+  rec_sph_max?: number;
+  rec_cyl_max?: number;
   description?: string;
   is_available: boolean;
+}
+
+export interface CreateLensIndexPayload {
+  brand_id: string;
+  index_value: string;
+  price_adder: number;
+  rec_sph_min?: number;
+  rec_sph_max?: number;
+  rec_cyl_max?: number;
+  description?: string;
 }
 
 export interface BrandLensColor {
@@ -83,17 +102,65 @@ export interface BrandLensCoating {
   is_available: boolean;
 }
 
-// Order Type
-export type OrderStatus = 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELLED' | string;
+// --- ORDER & CHECKOUT STRICT TYPES ---
+export interface CustomerProfile {
+  ageGroup: '< 18' | '18-40' | '> 40' | string;
+  hasBoughtBefore: boolean;
+}
+
+export interface PrescriptionData {
+  method: 'EXACT' | 'APPROXIMATE' | 'IN_STORE_EXAM';
+  sphRight?: number;
+  sphLeft?: number;
+  cylRight?: number;
+  cylLeft?: number;
+  axisRight?: number;
+  axisLeft?: number;
+  pd?: number;
+  approximateRange?: string;
+}
+
+export interface LensSelectionDetails {
+  brandId: string;
+  brandName: string;
+  lensTypeId: string;
+  lensTypeName: string;
+  indexId?: string;
+  indexValue?: string;
+  colorId?: string;
+  colorName?: string;
+  coatingId?: string;
+  coatingName?: string;
+  calculatedPrice: number;
+}
+
+export interface OrderItem {
+  id: string;
+  frameId?: string;
+  frameName?: string;
+  framePrice?: number;
+  lensDetails?: LensSelectionDetails;
+  totalItemPrice: number;
+}
+
+export type OrderStatus = 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELLED';
 
 export interface Order {
   id: string;
   created_at?: string;
   contact_info: string;
-  customer_profile: Record<string, any>;
-  prescription_data: Record<string, any>;
-  items: Record<string, any>[];
+  customer_profile: CustomerProfile;
+  prescription_data: PrescriptionData;
+  items: OrderItem[];
   total_price: number;
   status: OrderStatus;
   reserved_until: string;
+}
+
+export interface CreateOrderPayload {
+  contactInfo: string;
+  customerProfile: CustomerProfile;
+  prescriptionData: PrescriptionData;
+  items: OrderItem[];
+  totalPrice: number;
 }

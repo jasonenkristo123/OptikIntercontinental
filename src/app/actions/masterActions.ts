@@ -1,8 +1,10 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { AuthenticityTag, LensType, MasterItem } from '@/shared/types/database';
+import { revalidatePath } from 'next/cache';
 
-// Fetch semua master option untuk Form Admin & Filter Frontend
+
 export async function getMasterData() {
   const supabase = await createClient();
 
@@ -15,28 +17,65 @@ export async function getMasterData() {
   ]);
 
   return {
-    categories: categories.data || [],
-    materials: materials.data || [],
-    authenticity: authenticity.data || [],
-    lensTypes: lensTypes.data || [],
-    budgets: budgets.data || [],
+    categories: (categories.data || []) as MasterItem[],
+    materials: (materials.data || []) as MasterItem[],
+    authenticity: (authenticity.data || []) as AuthenticityTag[],
+    lensTypes: (lensTypes.data || []) as LensType[],
+    budgets: (budgets.data || []) as MasterItem[],
   };
 }
 
-// Fetch katalog frames lengkap dengan data relasinya (category, material, authenticity badge)
-export async function getFramesCatalog() {
+export async function createMasterItem(
+  table: 'frame_categories' | 'frame_materials' | 'budget_ranges',
+  name: string,
+  description?: string
+): Promise<MasterItem> {
   const supabase = await createClient();
+  const payload: { name: string; description?: string } = { name };
+  if (description) payload.description = description;
 
+  const { data, error } = await supabase.from(table).insert([payload]).select().single();
+  if (error) throw new Error(error.message);
+
+  revalidatePath('/admin');
+  return data as MasterItem;
+}
+
+export async function createAuthenticityTag(
+  name: string,
+  hasLogo: boolean,
+  logoUrl?: string
+): Promise<AuthenticityTag> {
+  const supabase = await createClient();
   const { data, error } = await supabase
-    .from('frames')
-    .select(`
-      *,
-      category:frame_categories(id, name),
-      material:frame_materials(id, name),
-      authenticity:authenticity_tags(id, name, has_logo, logo_url)
-    `)
-    .order('created_at', { ascending: false });
+    .from('authenticity_tags')
+    .insert([{ name, has_logo: hasLogo, logo_url: logoUrl || null }])
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
-  return data;
+  revalidatePath('/admin');
+  return data as AuthenticityTag;
+}
+
+export async function createLensType(name: string, description?: string): Promise<LensType> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('lens_types')
+    .insert([{ name, description }])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+  return data as LensType;
+}
+
+export async function deleteMasterItem(table: string, id: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { error } = await supabase.from(table).delete().eq('id', id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath('/admin');
+  return true;
 }
