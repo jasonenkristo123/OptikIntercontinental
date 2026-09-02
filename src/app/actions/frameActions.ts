@@ -6,7 +6,6 @@ import { CreateFramePayload, Frame } from '@/shared/types/database';
 
 export async function getFrames(): Promise<Frame[]> {
   const supabase = await createClient();
-
   const { data, error } = await supabase
     .from('frames')
     .select(`
@@ -23,18 +22,16 @@ export async function getFrames(): Promise<Frame[]> {
 
 export async function createFrame(formData: CreateFramePayload): Promise<Frame> {
   const supabase = await createClient();
-
   const { data, error } = await supabase.from('frames').insert([formData]).select().single();
   if (error) throw new Error(error.message);
 
-  revalidatePath('/');
   revalidatePath('/admin');
+  revalidatePath('/');
   return data as Frame;
 }
 
 export async function updateFrame(id: string, updateData: Partial<CreateFramePayload>): Promise<Frame> {
   const supabase = await createClient();
-
   const { data, error } = await supabase
     .from('frames')
     .update(updateData)
@@ -44,8 +41,8 @@ export async function updateFrame(id: string, updateData: Partial<CreateFramePay
 
   if (error) throw new Error(error.message);
 
-  revalidatePath('/');
   revalidatePath('/admin');
+  revalidatePath('/');
   return data as Frame;
 }
 
@@ -54,7 +51,7 @@ export async function deleteFrame(id: string): Promise<boolean> {
   const { error } = await supabase.from('frames').delete().eq('id', id);
   if (error) throw new Error(error.message);
 
-  revalidatePath('/');
   revalidatePath('/admin');
+  revalidatePath('/');
   return true;
 }
