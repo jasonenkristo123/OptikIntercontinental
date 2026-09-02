@@ -1,11 +1,11 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { CreateOrderPayload, Order, OrderItem } from '@/shared/types/database';
 
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const orderId = `OPT-${Math.floor(100000 + Math.random() * 900000)}`;
   const reservedUntil = new Date(Date.now() + 10 * 60 * 1000).toISOString();
@@ -109,7 +109,7 @@ export async function cancelOrder(orderId: string): Promise<boolean> {
 }
 
 export async function releaseExpiredOrders(): Promise<{ releasedCount: number }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const now = new Date().toISOString();
 
   const { data: expiredOrders } = await supabase

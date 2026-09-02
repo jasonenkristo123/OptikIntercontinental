@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import {
   BrandLensCoating,
@@ -12,7 +12,7 @@ import {
 } from '@/shared/types/database';
 
 export async function getMatchingBrandsForWizard(budgetRangeId: string, lensTypeId: string) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const { data, error } = await supabase
     .from('lens_brands')
@@ -38,7 +38,7 @@ export async function getMatchingBrandsForWizard(budgetRangeId: string, lensType
 }
 
 export async function getBrandMatrixOptions(brandId: string) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const [indexes, colors, coatings] = await Promise.all([
     supabase
@@ -71,7 +71,7 @@ export async function createLensBrand(
   budgetRangeId: string,
   description?: string
 ): Promise<LensBrand> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('lens_brands')
     .insert([{ name, budget_range_id: budgetRangeId, description }])
@@ -89,7 +89,7 @@ export async function setBrandLensType(
   basePrice: number,
   stock: number = 100
 ): Promise<BrandLensType> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('brand_lens_types')
     .upsert(
@@ -111,7 +111,7 @@ export async function setBrandLensType(
 }
 
 export async function addBrandLensIndex(payload: CreateLensIndexPayload): Promise<BrandLensIndex> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('brand_lens_indexes')
     .insert([payload])
@@ -128,7 +128,7 @@ export async function addBrandLensColor(
   colorName: string,
   priceAdder: number
 ): Promise<BrandLensColor> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('brand_lens_colors')
     .insert([{ brand_id: brandId, color_name: colorName, price_adder: priceAdder }])
@@ -145,7 +145,7 @@ export async function addBrandLensCoating(
   coatingName: string,
   priceAdder: number
 ): Promise<BrandLensCoating> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('brand_lens_coatings')
     .insert([{ brand_id: brandId, coating_name: coatingName, price_adder: priceAdder }])
