@@ -6,6 +6,20 @@ import { useCartStore } from '@/shared/store/useCartStore';
 import { getMatchingBrandsForWizard, getBrandMatrixOptions } from '@/app/actions/lensMatrixActions';
 import { createClient } from '@/lib/supabase/client';
 import { X, ArrowLeft, ArrowRight, Check, Sparkles, Loader2 } from 'lucide-react';
+import type { BudgetRange, LensType, LensBrand, BrandLensIndex, BrandLensColor, BrandLensCoating, PrescriptionData } from '@/shared/types/database';
+
+interface WizardBrand {
+  id: string;
+  name: string;
+  description?: string;
+  brand_lens_types?: Array<{
+    id: string;
+    lens_type_id: string;
+    base_price: number;
+    stock: number;
+    is_available: boolean;
+  }>;
+}
 
 export default function LensWizardModal() {
   const {
@@ -38,10 +52,10 @@ export default function LensWizardModal() {
   const { addItem } = useCartStore();
 
   // Async Fetch States
-  const [budgets, setBudgets] = useState<any[]>([]);
-  const [lensTypes, setLensTypes] = useState<any[]>([]);
-  const [matchingBrands, setMatchingBrands] = useState<any[]>([]);
-  const [brandOptions, setBrandOptions] = useState<{ indexes: any[]; colors: any[]; coatings: any[] }>({
+  const [budgets, setBudgets] = useState<BudgetRange[]>([]);
+  const [lensTypes, setLensTypes] = useState<LensType[]>([]);
+  const [matchingBrands, setMatchingBrands] = useState<WizardBrand[]>([]);
+  const [brandOptions, setBrandOptions] = useState<{ indexes: BrandLensIndex[]; colors: BrandLensColor[]; coatings: BrandLensCoating[] }>({
     indexes: [],
     colors: [],
     coatings: [],
@@ -122,10 +136,10 @@ export default function LensWizardModal() {
         <div className="p-6 border-b border-cream-300 bg-cream-50 flex items-center justify-between">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Step {currentStep} of 8 — Optical Lens Wizard
+              Langkah {currentStep} dari 8 — Kalkulator Lensa Optik
             </div>
             <h2 className="font-serif text-xl font-bold text-charcoal-900">
-              {selectedFrame ? `Customize Lens for ${selectedFrame.name}` : 'Standalone Lens Configuration'}
+              {selectedFrame ? `Sesuaikan Lensa untuk ${selectedFrame.name}` : 'Konfigurasi Lensa Terpisah'}
             </h2>
           </div>
           <button onClick={closeWizard} className="p-2 text-stone-400 hover:text-charcoal-900">
@@ -147,10 +161,10 @@ export default function LensWizardModal() {
           {/* STEP 1: CUSTOMER PROFILE */}
           {currentStep === 1 && (
             <div className="space-y-5">
-              <h3 className="font-serif font-bold text-lg">Step 1: Customer Profile</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 1: Profil Pelanggan</h3>
               
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-2">Select Age Group:</label>
+                <label className="block text-xs font-semibold text-stone-600 mb-2">Pilih Kelompok Usia:</label>
                 <div className="grid grid-cols-3 gap-3">
                   {['< 18', '18-40', '> 40'].map((age) => (
                     <button
@@ -162,18 +176,18 @@ export default function LensWizardModal() {
                           : 'bg-white border-cream-300 text-stone-700 hover:bg-cream-200'
                       }`}
                     >
-                      {age} years old
+                      {age} tahun
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-2">Have you bought prescription glasses before?</label>
+                <label className="block text-xs font-semibold text-stone-600 mb-2">Apakah Anda pernah membeli kacamata resep sebelumnya?</label>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: 'Yes, experienced user', val: true },
-                    { label: 'No, first time buyer', val: false },
+                    { label: 'Ya, pengguna berpengalaman', val: true },
+                    { label: 'Tidak, pembeli pertama kali', val: false },
                   ].map((opt) => (
                     <button
                       key={opt.label}
@@ -195,17 +209,17 @@ export default function LensWizardModal() {
           {/* STEP 2: PRESCRIPTION & EYE MEASUREMENT */}
           {currentStep === 2 && (
             <div className="space-y-5">
-              <h3 className="font-serif font-bold text-lg">Step 2: Prescription Input</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 2: Input Resep</h3>
               
               <div className="flex gap-2 border-b border-cream-300 pb-3">
                 {[
-                  { id: 'EXACT', label: 'Exact Prescription' },
-                  { id: 'APPROXIMATE', label: 'Approximate Range' },
-                  { id: 'IN_STORE_EXAM', label: 'Free In-Store Exam' },
+                  { id: 'EXACT', label: 'Resep Tepat' },
+                  { id: 'APPROXIMATE', label: 'Rentang Perkiraan' },
+                  { id: 'IN_STORE_EXAM', label: 'Pemeriksaan Gratis di Toko' },
                 ].map((m) => (
                   <button
                     key={m.id}
-                    onClick={() => updateState({ prescriptionData: { ...prescriptionData, method: m.id as any } })}
+                    onClick={() => updateState({ prescriptionData: { ...prescriptionData, method: m.id as PrescriptionData['method'] } })}
                     className={`px-3 py-1.5 rounded-sm text-xs font-medium transition ${
                       prescriptionData.method === m.id ? 'bg-charcoal-900 text-cream-50' : 'bg-cream-200 text-stone-700'
                     }`}
@@ -219,7 +233,7 @@ export default function LensWizardModal() {
                 <div className="space-y-3 bg-white p-4 rounded-sm border border-cream-300">
                   <div className="grid grid-cols-3 gap-3 font-mono text-xs">
                     <div>
-                      <label className="block text-stone-500 mb-1">SPH Right (OD)</label>
+                      <label className="block text-stone-500 mb-1">SPH Kanan (OD)</label>
                       <input
                         type="number"
                         step="0.25"
@@ -229,7 +243,7 @@ export default function LensWizardModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-stone-500 mb-1">SPH Left (OS)</label>
+                      <label className="block text-stone-500 mb-1">SPH Kiri (OS)</label>
                       <input
                         type="number"
                         step="0.25"
@@ -239,7 +253,7 @@ export default function LensWizardModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-stone-500 mb-1">PD (Pupil Distance)</label>
+                      <label className="block text-stone-500 mb-1">PD (Jarak Pupil)</label>
                       <input
                         type="number"
                         value={prescriptionData.pd}
@@ -253,8 +267,8 @@ export default function LensWizardModal() {
 
               {prescriptionData.method === 'APPROXIMATE' && (
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-stone-600">Select Rough Power Estimation:</label>
-                  {['Low (-0.25 to -2.00)', 'Moderate (-2.25 to -4.00)', 'High (-4.25+)', 'Unsure / Need CS Help'].map((r) => (
+                  <label className="block text-xs font-semibold text-stone-600">Pilih Perkiraan Kekuatan:</label>
+                  {['Rendah (-0.25 hingga -2.00)', 'Sedang (-2.25 hingga -4.00)', 'Tinggi (-4.25+)', 'Ragu / Butuh Bantuan CS'].map((r) => (
                     <button
                       key={r}
                       onClick={() => updateState({ prescriptionData: { ...prescriptionData, approximateRange: r } })}
@@ -270,8 +284,8 @@ export default function LensWizardModal() {
 
               {prescriptionData.method === 'IN_STORE_EXAM' && (
                 <div className="bg-amber-50 border border-amber-200 p-4 rounded-sm text-xs text-amber-900 space-y-1">
-                  <div className="font-bold">Free In-Store Examination Included</div>
-                  <p>You can visit Optik Intercontinental store after checkout to get your eyes examined by our certified optician for free.</p>
+                  <div className="font-bold">Termasuk Pemeriksaan Gratis di Toko</div>
+                  <p>Anda dapat mengunjungi toko Optik Intercontinental setelah checkout untuk memeriksakan mata Anda oleh ahli kacamata bersertifikat kami secara gratis.</p>
                 </div>
               )}
             </div>
@@ -280,7 +294,7 @@ export default function LensWizardModal() {
           {/* STEP 3: BUDGET RANGE */}
           {currentStep === 3 && (
             <div className="space-y-4">
-              <h3 className="font-serif font-bold text-lg">Step 3: Target Budget Range</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 3: Target Rentang Anggaran</h3>
               <div className="space-y-2">
                 {budgets.map((b) => (
                   <button
@@ -291,7 +305,7 @@ export default function LensWizardModal() {
                     }`}
                   >
                     <div className="font-bold text-sm">{b.name}</div>
-                    <div className="text-xs opacity-80 mt-0.5">{b.description || 'Standard optical performance range.'}</div>
+                    <div className="text-xs opacity-80 mt-0.5">{b.description || 'Rentang kinerja optik standar.'}</div>
                   </button>
                 ))}
               </div>
@@ -301,7 +315,7 @@ export default function LensWizardModal() {
           {/* STEP 4: LENS TYPE */}
           {currentStep === 4 && (
             <div className="space-y-4">
-              <h3 className="font-serif font-bold text-lg">Step 4: Select Lens Type</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 4: Pilih Jenis Lensa</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {lensTypes.map((lt) => (
                   <button
@@ -322,14 +336,14 @@ export default function LensWizardModal() {
           {/* STEP 5: DYNAMIC BRAND SELECTION */}
           {currentStep === 5 && (
             <div className="space-y-4">
-              <h3 className="font-serif font-bold text-lg">Step 5: Available Lens Brands</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 5: Merek Lensa yang Tersedia</h3>
               {loading ? (
                 <div className="text-center py-12 text-stone-500 flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" /> Fetching matching brands...
+                  <Loader2 className="w-5 h-5 animate-spin" /> Mengambil merek yang cocok...
                 </div>
               ) : matchingBrands.length === 0 ? (
                 <div className="text-center py-8 text-stone-500">
-                  No brands match this specific budget and lens type combination. Please try adjusting Step 3.
+                  Tidak ada merek yang cocok dengan kombinasi anggaran dan jenis lensa ini. Silakan coba sesuaikan Langkah 3.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -354,7 +368,7 @@ export default function LensWizardModal() {
                           <div className="text-xs opacity-75">{b.description}</div>
                         </div>
                         <div className="text-right font-mono font-bold">
-                          Base: Rp {Number(typeInfo?.base_price || 0).toLocaleString('id-ID')}
+                          Dasar: Rp {Number(typeInfo?.base_price || 0).toLocaleString('id-ID')}
                         </div>
                       </button>
                     );
@@ -367,7 +381,7 @@ export default function LensWizardModal() {
           {/* STEP 6: COLOR / SUN PROTECTION */}
           {currentStep === 6 && (
             <div className="space-y-4">
-              <h3 className="font-serif font-bold text-lg">Step 6: Lens Color & Sun Protection</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 6: Warna Lensa & Perlindungan Matahari</h3>
               <div className="space-y-2">
                 <button
                   onClick={() => updateState({ selectedColorId: '', selectedColorName: 'Clear (Bening)', selectedColorPrice: 0 })}
@@ -404,7 +418,7 @@ export default function LensWizardModal() {
           {/* STEP 7: COATING & FEATURES */}
           {currentStep === 7 && (
             <div className="space-y-4">
-              <h3 className="font-serif font-bold text-lg">Step 7: Protective Coating</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 7: Pelapis Pelindung</h3>
               <div className="space-y-2">
                 <button
                   onClick={() => updateState({ selectedCoatingId: '', selectedCoatingName: 'Standard Anti-Radiation', selectedCoatingPrice: 0 })}
@@ -412,7 +426,7 @@ export default function LensWizardModal() {
                     !selectedCoatingId ? 'bg-charcoal-900 text-cream-50' : 'bg-white border-cream-300'
                   }`}
                 >
-                  <div>Standard Anti-Radiation Coating</div>
+                  <div>Pelapis Anti Radiasi Standar</div>
                   <div>+ Rp 0</div>
                 </button>
 
@@ -441,12 +455,12 @@ export default function LensWizardModal() {
           {/* STEP 8: LENS THICKNESS INDEX & PRICING BREAKDOWN */}
           {currentStep === 8 && (
             <div className="space-y-6">
-              <h3 className="font-serif font-bold text-lg">Step 8: Lens Thickness Index & Pricing</h3>
+              <h3 className="font-serif font-bold text-lg">Langkah 8: Indeks Ketebalan Lensa & Harga</h3>
               
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-stone-600">Choose Thickness Index:</label>
+                <label className="block text-xs font-semibold text-stone-600">Pilih Indeks Ketebalan:</label>
                 {brandOptions.indexes.length === 0 ? (
-                  <div className="text-xs text-stone-500 bg-white p-3 rounded border">Standard Index 1.56 (Included)</div>
+                  <div className="text-xs text-stone-500 bg-white p-3 rounded border">Indeks Standar 1.56 (Termasuk)</div>
                 ) : (
                   brandOptions.indexes.map((idx) => (
                     <button
@@ -464,7 +478,7 @@ export default function LensWizardModal() {
                     >
                       <div>
                         <div className="font-bold">Index {idx.index_value}</div>
-                        <div className="text-xs opacity-75">{idx.description || 'Optimal optical clarity'}</div>
+                        <div className="text-xs opacity-75">{idx.description || 'Kejernihan optik optimal'}</div>
                       </div>
                       <div className="font-mono">+ Rp {Number(idx.price_adder).toLocaleString('id-ID')}</div>
                     </button>
@@ -474,14 +488,14 @@ export default function LensWizardModal() {
 
               {/* Final Summary Card */}
               <div className="bg-white p-4 rounded-sm border border-cream-300 space-y-2 text-xs">
-                <div className="font-serif font-bold text-sm text-charcoal-900 border-b border-cream-200 pb-2">Order Price Summary</div>
-                {selectedFrame && <div className="flex justify-between"><span>Frame: {selectedFrame.name}</span><span>Rp {framePrice.toLocaleString('id-ID')}</span></div>}
-                <div className="flex justify-between"><span>Base Lens ({selectedBrandName || 'Standard'}):</span><span>Rp {basePrice.toLocaleString('id-ID')}</span></div>
-                {selectedIndexPrice > 0 && <div className="flex justify-between"><span>Index Adder ({selectedIndexValue}):</span><span>+ Rp {selectedIndexPrice.toLocaleString('id-ID')}</span></div>}
-                {selectedColorPrice > 0 && <div className="flex justify-between"><span>Color ({selectedColorName}):</span><span>+ Rp {selectedColorPrice.toLocaleString('id-ID')}</span></div>}
-                {selectedCoatingPrice > 0 && <div className="flex justify-between"><span>Coating ({selectedCoatingName}):</span><span>+ Rp {selectedCoatingPrice.toLocaleString('id-ID')}</span></div>}
+                <div className="font-serif font-bold text-sm text-charcoal-900 border-b border-cream-200 pb-2">Ringkasan Harga Pesanan</div>
+                {selectedFrame && <div className="flex justify-between"><span>Bingkai: {selectedFrame.name}</span><span>Rp {framePrice.toLocaleString('id-ID')}</span></div>}
+                <div className="flex justify-between"><span>Lensa Dasar ({selectedBrandName || 'Standar'}):</span><span>Rp {basePrice.toLocaleString('id-ID')}</span></div>
+                {selectedIndexPrice > 0 && <div className="flex justify-between"><span>Tambahan Indeks ({selectedIndexValue}):</span><span>+ Rp {selectedIndexPrice.toLocaleString('id-ID')}</span></div>}
+                {selectedColorPrice > 0 && <div className="flex justify-between"><span>Warna ({selectedColorName}):</span><span>+ Rp {selectedColorPrice.toLocaleString('id-ID')}</span></div>}
+                {selectedCoatingPrice > 0 && <div className="flex justify-between"><span>Pelapis ({selectedCoatingName}):</span><span>+ Rp {selectedCoatingPrice.toLocaleString('id-ID')}</span></div>}
                 <div className="flex justify-between font-bold text-sm text-charcoal-900 border-t border-cream-200 pt-2">
-                  <span>Grand Total:</span>
+                  <span>Total Keseluruhan:</span>
                   <span>Rp {grandTotal.toLocaleString('id-ID')}</span>
                 </div>
               </div>
@@ -497,7 +511,7 @@ export default function LensWizardModal() {
             disabled={currentStep === 1}
             className="flex items-center gap-2 px-4 py-2 rounded-sm border border-cream-300 text-xs font-semibold text-stone-700 hover:bg-cream-200 disabled:opacity-40"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" /> Kembali
           </button>
 
           {currentStep < 8 ? (
@@ -505,14 +519,14 @@ export default function LensWizardModal() {
               onClick={handleNext}
               className="flex items-center gap-2 px-6 py-2.5 rounded-sm bg-charcoal-900 hover:bg-stone-800 text-cream-50 text-xs font-semibold uppercase tracking-wider"
             >
-              Next Step <ArrowRight className="w-4 h-4" />
+              Langkah Selanjutnya <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
             <button
               onClick={handleAddToCart}
               className="flex items-center gap-2 px-6 py-2.5 rounded-sm bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold uppercase tracking-wider"
             >
-              <Check className="w-4 h-4" /> Add to Cart & Hold Stock
+              <Check className="w-4 h-4" /> Tambahkan ke Keranjang & Simpan Stok
             </button>
           )}
         </div>

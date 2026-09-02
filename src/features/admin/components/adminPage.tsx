@@ -39,6 +39,7 @@ import {
   Edit2
 } from 'lucide-react';
 import LensMatrixTab from './lensMatrixTab';
+import Image from 'next/image';
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<'orders' | 'frames' | 'matrix' | 'master'>('orders');
@@ -262,7 +263,6 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB CONTENT 2: FRAMES CATALOG MANAGEMENT */}
       {activeTab === 'frames' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
@@ -282,11 +282,14 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {frames.map((frame) => (
               <div key={frame.id} className="bg-cream-50 border border-cream-300 rounded-sm overflow-hidden p-4 flex gap-4 items-center">
-                <img
-                  src={frame.image_url}
-                  alt={frame.name}
-                  className="w-20 h-20 object-cover rounded-sm bg-cream-100 border border-cream-300 shrink-0"
-                />
+                <div className="relative w-20 h-20 shrink-0">
+                  <Image
+                    src={frame.image_url}
+                    alt={frame.name}
+                    fill
+                    className="object-cover rounded-sm bg-cream-100 border border-cream-300"
+                  />
+                </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-serif font-normal text-charcoal-900 truncate text-sm">{frame.name}</h3>
                   <p className="text-xs text-charcoal-900 mt-0.5">

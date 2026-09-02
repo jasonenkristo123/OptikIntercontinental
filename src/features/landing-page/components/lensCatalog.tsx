@@ -5,38 +5,38 @@ import { Eye, Sun, Shield, Car, Glasses, Layers, ArrowRight } from 'lucide-react
 
 const LENS_SOLUTIONS = [
   {
-    title: 'Single Vision',
-    desc: 'Daily distance or reading lenses for minus, plus, & astigmatism.',
+    title: 'Lensa Penglihatan Tunggal',
+    desc: 'Lensa harian untuk rabun jauh, dekat, & silinder.',
     icon: Eye,
     startingPrice: 'Rp 150.000',
   },
   {
-    title: 'Progressive Lenses',
-    desc: 'No-line multifocal for seamless distance & reading sight.',
+    title: 'Lensa Progresif',
+    desc: 'Multifokal tanpa garis untuk penglihatan jauh & dekat yang mulus.',
     icon: Layers,
     startingPrice: 'Rp 450.000',
   },
   {
-    title: 'Bifocal Lenses',
-    desc: 'Classic Flat Top or Kryptok segmented dual-view lenses.',
+    title: 'Lensa Bifokal',
+    desc: 'Lensa pandangan ganda bersegmen klasik Flat Top atau Kryptok.',
     icon: Glasses,
     startingPrice: 'Rp 250.000',
   },
   {
-    title: 'Anti-Radiation / Blue Protect',
-    desc: 'Blocks harmful blue light from phones, tablets, & monitors.',
+    title: 'Anti Radiasi / Blue Protect',
+    desc: 'Memblokir sinar biru berbahaya dari ponsel, tablet, & monitor.',
     icon: Shield,
     startingPrice: 'Rp 200.000',
   },
   {
-    title: 'Driving Lenses',
-    desc: 'Anti-glare coating engineered for day & night driving safety.',
+    title: 'Lensa Mengemudi',
+    desc: 'Pelapis anti-silau yang dirancang untuk keselamatan berkendara siang & malam.',
     icon: Car,
     startingPrice: 'Rp 350.000',
   },
   {
-    title: 'Photochromic / Transitions',
-    desc: 'Sun-adaptive lenses that darken automatically outdoors.',
+    title: 'Photocromic / Transitions',
+    desc: 'Lensa adaptif matahari yang otomatis menggelap di luar ruangan.',
     icon: Sun,
     startingPrice: 'Rp 300.000',
   },
@@ -52,13 +52,13 @@ export default function LensCatalog() {
         {/* Section Title */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Precision Optics</p>
+            <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Optik Presisi</p>
             <h2 className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900 mt-1">
-              Standalone Lens Solutions
+              Solusi Lensa Terpisah
             </h2>
           </div>
           <p className="text-xs text-stone-600 max-w-md font-light">
-            Already have your favorite frame? Order high-precision optical lenses tailored directly to your prescription.
+            Sudah punya bingkai favorit? Pesan lensa optik presisi tinggi yang disesuaikan langsung dengan resep Anda.
           </p>
         </div>
 
@@ -80,12 +80,12 @@ export default function LensCatalog() {
                 </div>
 
                 <div className="pt-4 border-t border-cream-200 flex items-center justify-between">
-                  <span className="text-xs font-mono text-stone-500">Starting from <strong className="text-charcoal-900">{item.startingPrice}</strong></span>
+                  <span className="text-xs font-mono text-stone-500">Mulai dari <strong className="text-charcoal-900">{item.startingPrice}</strong></span>
                   <button
                     onClick={() => openWizard(undefined, 4)} // Langsung ke Step 4 Tipe Lensa
                     className="text-xs font-semibold uppercase tracking-wider text-charcoal-900 flex items-center gap-1 hover:gap-2 transition-all"
                   >
-                    <span>Select</span>
+                    <span>Pilih</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -97,14 +97,14 @@ export default function LensCatalog() {
         {/* Standalone Banner */}
         <div className="bg-charcoal-900 text-cream-50 p-8 rounded-sm flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="font-serif text-xl font-normal">Need help choosing your lens specification?</h3>
-            <p className="text-xs text-stone-400 mt-1 font-light">Use our step-by-step optical calculator to find the exact thickness, coating, and prescription match.</p>
+            <h3 className="font-serif text-xl font-normal">Butuh bantuan memilih spesifikasi lensa Anda?</h3>
+            <p className="text-xs text-stone-400 mt-1 font-light">Gunakan kalkulator optik selangkah demi selangkah kami untuk menemukan kecocokan ketebalan, pelapis, dan resep yang tepat.</p>
           </div>
           <button
             onClick={() => openWizard(undefined, 1)}
             className="shrink-0 bg-cream-50 text-charcoal-900 px-6 py-3 rounded-sm text-xs font-semibold uppercase tracking-wider hover:bg-cream-200 transition"
           >
-            Open Lens Wizard
+            Buka Kalkulator Lensa
           </button>
         </div>
 

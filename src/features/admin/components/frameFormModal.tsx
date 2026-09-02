@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createFrame, updateFrame } from '@/app/actions/frameActions';
 import { uploadAndCompressImage } from '@/lib/uploadImage';
-import { Frame, MasterItem, AuthenticityTag } from '@/shared/types/database';
+import { Frame, MasterItem, AuthenticityTag, CreateFramePayload } from '@/shared/types/database';
 import { X, Upload, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Props {
   isOpen: boolean;
@@ -30,13 +31,28 @@ export default function FrameFormModal({
   const [previewUrl, setPreviewUrl] = useState<string>(initialData?.image_url || '');
 
   const [form, setForm] = useState({
-    name: initialData?.name || '',
-    category_id: initialData?.category_id || categories[0]?.id || '',
-    material_id: initialData?.material_id || materials[0]?.id || '',
-    authenticity_id: initialData?.authenticity_id || authenticity[0]?.id || '',
-    price: initialData?.price || 0,
-    stock: initialData?.stock || 0,
+    name: initialData?.name ?? '',
+    category_id: initialData?.category_id ?? (categories[0]?.id ?? ''),
+    material_id: initialData?.material_id ?? (materials[0]?.id ?? ''),
+    authenticity_id: initialData?.authenticity_id ?? (authenticity[0]?.id ?? ''),
+    price: initialData?.price ?? '',
+    stock: initialData?.stock ?? '',
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      setFile(null);
+      setPreviewUrl(initialData?.image_url || '');
+      setForm({
+        name: initialData?.name ?? '',
+        category_id: initialData?.category_id ?? (categories[0]?.id ?? ''),
+        material_id: initialData?.material_id ?? (materials[0]?.id ?? ''),
+        authenticity_id: initialData?.authenticity_id ?? (authenticity[0]?.id ?? ''),
+        price: initialData?.price ?? '',
+        stock: initialData?.stock ?? '',
+      });
+    }
+  }, [isOpen, initialData, categories, materials, authenticity]);
 
   if (!isOpen) return null;
 
@@ -53,7 +69,7 @@ export default function FrameFormModal({
     setLoading(true);
 
     try {
-      let imageUrl = initialData?.image_url || '';
+      let imageUrl = initialData?.image_url ?? '';
 
       if (file) {
         imageUrl = await uploadAndCompressImage(file);
@@ -65,10 +81,15 @@ export default function FrameFormModal({
         return;
       }
 
-      const payload: any = { ...form, image_url: imageUrl };
-      if (!payload.category_id) payload.category_id = null;
-      if (!payload.material_id) payload.material_id = null;
-      if (!payload.authenticity_id) payload.authenticity_id = null;
+      const payload: CreateFramePayload = { 
+        ...form, 
+        price: Number(form.price),
+        stock: Number(form.stock),
+        image_url: imageUrl,
+        category_id: form.category_id || '',
+        material_id: form.material_id || '',
+        authenticity_id: form.authenticity_id || '',
+      };
 
       if (initialData?.id) {
         await updateFrame(initialData.id, payload);
@@ -78,8 +99,12 @@ export default function FrameFormModal({
 
       onSuccess();
       onClose();
-    } catch (err: any) {
-      alert(err.message || 'Gagal menyimpan frame');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message || 'Gagal menyimpan frame');
+      } else {
+        alert('Gagal menyimpan frame');
+      }
     } finally {
       setLoading(false);
     }
@@ -155,7 +180,7 @@ export default function FrameFormModal({
                 type="number"
                 required
                 value={form.price}
-                onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
               />
             </div>
@@ -166,7 +191,7 @@ export default function FrameFormModal({
                 type="number"
                 required
                 value={form.stock}
-                onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
+                onChange={(e) => setForm({ ...form, stock: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
               />
             </div>
@@ -177,7 +202,9 @@ export default function FrameFormModal({
             <label className="block text-xs font-semibold text-stone-500 mb-1">Foto Produk (Auto WebP)</label>
             <div className="flex items-center gap-4">
               {previewUrl && (
-                <img src={previewUrl} alt="Preview" className="w-16 h-16 object-cover rounded-sm bg-cream-100 border border-cream-300" />
+                <div className="relative w-16 h-16 shrink-0">
+                  <Image src={previewUrl} alt="Preview" fill className="object-cover rounded-sm bg-cream-100 border border-cream-300" unoptimized />
+                </div>
               )}
               <label className="flex-1 flex items-center justify-center gap-2 border border-dashed border-cream-400 hover:border-charcoal-900 rounded-sm py-3 cursor-pointer text-stone-500 hover:text-charcoal-900 text-xs transition">
                 <Upload className="w-4 h-4" />

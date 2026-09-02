@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { CustomerProfile, PrescriptionData } from '@/shared/types/database';
 
 export interface CartItem {
   id: string;
@@ -16,8 +17,8 @@ export interface CartItem {
     coatingName?: string;
     calculatedPrice: number;
   };
-  prescriptionData?: any;
-  customerProfile?: any;
+  prescriptionData?: PrescriptionData;
+  customerProfile?: CustomerProfile;
   totalPrice: number;
 }
 

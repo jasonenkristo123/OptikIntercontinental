@@ -5,6 +5,7 @@ import FrameCatalog from '../components/frameCatalog';
 import LensCatalog from '../components/lensCatalog';
 import CustomerReviews from '../components/customerReviews';
 import LensWizardModal from '../components/lensWizardModal';
+import FloatingWhatsAppButton from '../components/floatingWhatsAppButton';
 import { Frame } from '@/shared/types/database';
 import HomeLayout from '@/shared/ui/homeLayout';
 
@@ -20,6 +21,7 @@ export default function HomeContainer({ frames }: Props) {
       <LensCatalog />
       <CustomerReviews />
       <LensWizardModal />
+      <FloatingWhatsAppButton />
     </HomeLayout>
   );
 }

@@ -1,17 +1,212 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   createLensBrand, 
   setBrandLensType, 
   addBrandLensIndex, 
   addBrandLensColor, 
   addBrandLensCoating,
-  getBrandMatrixOptions
+  getBrandMatrixOptions,
+  deleteBrandLensType,
+  deleteBrandLensIndex,
+  deleteBrandLensColor,
+  deleteBrandLensCoating,
+  updateBrandLensType,
+  updateBrandLensIndex,
+  updateBrandLensColor,
+  updateBrandLensCoating,
 } from '@/app/actions/lensMatrixActions';
-import { MasterItem, LensType, LensBrand, BrandLensIndex, BrandLensColor, BrandLensCoating } from '@/shared/types/database';
-import { Plus, Sliders, Check, Layers, Palette, ShieldCheck, Loader2 } from 'lucide-react';
+import { MasterItem, LensType, LensBrand, BrandLensType, BrandLensIndex, BrandLensColor, BrandLensCoating } from '@/shared/types/database';
+import { Plus, Sliders, Check, Layers, Palette, ShieldCheck, X, Pencil, Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+
+// --- Reusable Editable Item Card ---
+
+type EditableItemProps = {
+  id: string;
+  label: string;
+  sublabel?: string;
+  onDelete: (id: string) => Promise<void>;
+  onEdit: (id: string) => void;
+  isDeleting: string | null;
+};
+
+function EditableItemCard({ id, label, sublabel, onDelete, onEdit, isDeleting }: EditableItemProps) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    await onDelete(id);
+    setConfirmDelete(false);
+  };
+
+  return (
+    <div className="group relative bg-cream-100 border border-cream-300 rounded-md px-3 py-2 text-xs text-stone-600 flex items-center gap-2 transition-all hover:border-stone-400 hover:shadow-sm">
+      <div className="flex-1 min-w-0">
+        <span className="font-medium text-charcoal-900">{label}</span>
+        {sublabel && <span className="text-stone-400 ml-1">{sublabel}</span>}
+      </div>
+
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button
+          onClick={() => onEdit(id)}
+          className="p-1 rounded hover:bg-cream-200 text-stone-400 hover:text-charcoal-900 transition"
+          title="Edit"
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+
+        {confirmDelete ? (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting === id}
+              className="px-1.5 py-0.5 text-[10px] font-semibold bg-red-100 text-red-700 rounded hover:bg-red-200 transition disabled:opacity-50"
+            >
+              {isDeleting === id ? '...' : 'Ya'}
+            </button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="px-1.5 py-0.5 text-[10px] font-semibold bg-cream-200 text-stone-500 rounded hover:bg-cream-300 transition"
+            >
+              Batal
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleDelete}
+            className="p-1 rounded hover:bg-red-50 text-stone-400 hover:text-red-600 transition"
+            title="Hapus"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// --- Inline Edit Forms ---
+
+type InlineEditLensTypeProps = {
+  item: BrandLensType & { lens_type: { id: string; name: string } };
+  onSave: (id: string, basePrice: number) => Promise<void>;
+  onCancel: () => void;
+};
+
+function InlineEditLensType({ item, onSave, onCancel }: InlineEditLensTypeProps) {
+  const [price, setPrice] = useState(item.base_price);
+  const [saving, setSaving] = useState(false);
+
+  return (
+    <div className="bg-stone-100 border border-stone-300 rounded-md p-3 text-xs space-y-2">
+      <div className="font-medium text-charcoal-900">{item.lens_type?.name}</div>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          value={price}
+          onChange={(e) => setPrice(Number(e.target.value))}
+          className="flex-1 bg-cream-50 border border-cream-300 rounded-sm px-2 py-1.5 text-charcoal-900"
+          placeholder="Harga Dasar (Rp)"
+        />
+        <button
+          disabled={saving}
+          onClick={async () => {
+            setSaving(true);
+            await onSave(item.id, price);
+            setSaving(false);
+          }}
+          className="p-1.5 rounded bg-charcoal-900 text-cream-50 hover:bg-stone-800 transition disabled:opacity-50"
+        >
+          <Check className="w-3 h-3" />
+        </button>
+        <button onClick={onCancel} className="p-1.5 rounded bg-cream-200 text-stone-500 hover:bg-cream-300 transition">
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type InlineEditIndexProps = {
+  item: BrandLensIndex;
+  onSave: (id: string, payload: { index_value?: string; price_adder?: number; description?: string }) => Promise<void>;
+  onCancel: () => void;
+};
+
+function InlineEditIndex({ item, onSave, onCancel }: InlineEditIndexProps) {
+  const [indexVal, setIndexVal] = useState(item.index_value);
+  const [adder, setAdder] = useState(item.price_adder);
+  const [desc, setDesc] = useState(item.description || '');
+  const [saving, setSaving] = useState(false);
+
+  return (
+    <div className="bg-stone-100 border border-stone-300 rounded-md p-3 text-xs space-y-2">
+      <div className="grid grid-cols-3 gap-2">
+        <input value={indexVal} onChange={(e) => setIndexVal(e.target.value)} className="bg-cream-50 border border-cream-300 rounded-sm px-2 py-1.5 text-charcoal-900" placeholder="Index" />
+        <input type="number" value={adder} onChange={(e) => setAdder(Number(e.target.value))} className="bg-cream-50 border border-cream-300 rounded-sm px-2 py-1.5 text-charcoal-900" placeholder="+Harga" />
+        <input value={desc} onChange={(e) => setDesc(e.target.value)} className="bg-cream-50 border border-cream-300 rounded-sm px-2 py-1.5 text-charcoal-900" placeholder="Deskripsi" />
+      </div>
+      <div className="flex justify-end gap-2">
+        <button
+          disabled={saving}
+          onClick={async () => {
+            setSaving(true);
+            await onSave(item.id, { index_value: indexVal, price_adder: adder, description: desc });
+            setSaving(false);
+          }}
+          className="px-3 py-1.5 rounded bg-charcoal-900 text-cream-50 font-semibold hover:bg-stone-800 transition disabled:opacity-50"
+        >
+          Simpan
+        </button>
+        <button onClick={onCancel} className="px-3 py-1.5 rounded bg-cream-200 text-stone-500 font-semibold hover:bg-cream-300 transition">Batal</button>
+      </div>
+    </div>
+  );
+}
+
+type InlineEditSimpleProps = {
+  name: string;
+  adder: number;
+  nameLabel: string;
+  onSave: (name: string, adder: number) => Promise<void>;
+  onCancel: () => void;
+};
+
+function InlineEditSimple({ name: initName, adder: initAdder, nameLabel, onSave, onCancel }: InlineEditSimpleProps) {
+  const [name, setName] = useState(initName);
+  const [adder, setAdder] = useState(initAdder);
+  const [saving, setSaving] = useState(false);
+
+  return (
+    <div className="bg-stone-100 border border-stone-300 rounded-md p-3 text-xs space-y-2">
+      <div className="grid grid-cols-2 gap-2">
+        <input value={name} onChange={(e) => setName(e.target.value)} className="bg-cream-50 border border-cream-300 rounded-sm px-2 py-1.5 text-charcoal-900" placeholder={nameLabel} />
+        <input type="number" value={adder} onChange={(e) => setAdder(Number(e.target.value))} className="bg-cream-50 border border-cream-300 rounded-sm px-2 py-1.5 text-charcoal-900" placeholder="+Harga (Rp)" />
+      </div>
+      <div className="flex justify-end gap-2">
+        <button
+          disabled={saving}
+          onClick={async () => {
+            setSaving(true);
+            await onSave(name, adder);
+            setSaving(false);
+          }}
+          className="px-3 py-1.5 rounded bg-charcoal-900 text-cream-50 font-semibold hover:bg-stone-800 transition disabled:opacity-50"
+        >
+          Simpan
+        </button>
+        <button onClick={onCancel} className="px-3 py-1.5 rounded bg-cream-200 text-stone-500 font-semibold hover:bg-cream-300 transition">Batal</button>
+      </div>
+    </div>
+  );
+}
+
+// --- Main Component ---
 
 interface Props {
   masterData: {
@@ -22,16 +217,19 @@ interface Props {
 }
 
 export default function LensMatrixTab({ masterData, onRefresh }: Props) {
-  const [brands, setBrands] = useState<any[]>([]);
+  const [brands, setBrands] = useState<LensBrand[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // States Sub-Options per Selected Brand
   const [brandOptions, setBrandOptions] = useState<{
+    lensTypes: (BrandLensType & { lens_type: { id: string; name: string } })[];
     indexes: BrandLensIndex[];
     colors: BrandLensColor[];
     coatings: BrandLensCoating[];
-  }>({ indexes: [], colors: [], coatings: [] });
+  }>({ lensTypes: [], indexes: [], colors: [], coatings: [] });
 
   // Form States
   const [brandName, setBrandName] = useState('');
@@ -40,17 +238,17 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
 
   // Form Sub-Input
   const [selectedLensType, setSelectedLensType] = useState('');
-  const [basePrice, setBasePrice] = useState(0);
+  const [basePrice, setBasePrice] = useState<number | string>('');
 
   const [indexValue, setIndexValue] = useState('1.56');
-  const [indexAdder, setIndexAdder] = useState(0);
+  const [indexAdder, setIndexAdder] = useState<number | string>('');
   const [indexDesc, setIndexDesc] = useState('');
 
   const [colorName, setColorName] = useState('');
-  const [colorAdder, setColorAdder] = useState(0);
+  const [colorAdder, setColorAdder] = useState<number | string>('');
 
   const [coatingName, setCoatingName] = useState('');
-  const [coatingAdder, setCoatingAdder] = useState(0);
+  const [coatingAdder, setCoatingAdder] = useState<number | string>('');
 
   // Fetch Brands
   const fetchBrands = async () => {
@@ -62,12 +260,12 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
     }
   };
 
-  const fetchSelectedBrandOptions = async (brandId: string) => {
+  const fetchSelectedBrandOptions = useCallback(async (brandId: string) => {
     setLoading(true);
     const res = await getBrandMatrixOptions(brandId);
     setBrandOptions(res);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchBrands();
@@ -77,9 +275,14 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
     if (selectedBrandId) {
       fetchSelectedBrandOptions(selectedBrandId);
     }
-  }, [selectedBrandId]);
+  }, [selectedBrandId, fetchSelectedBrandOptions]);
 
-  // Handlers
+  // Helper to refresh options after any mutation
+  const refreshOptions = () => {
+    if (selectedBrandId) fetchSelectedBrandOptions(selectedBrandId);
+  };
+
+  // --- Handlers ---
   const handleAddBrand = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!brandName || !selectedBudget) return;
@@ -91,8 +294,10 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
 
   const handleSetLensType = async () => {
     if (!selectedBrandId || !selectedLensType) return;
-    await setBrandLensType(selectedBrandId, selectedLensType, basePrice);
-    alert('Tipe Lensa & Harga Dasar berhasil dikonfigurasi!');
+    await setBrandLensType(selectedBrandId, selectedLensType, Number(basePrice));
+    setSelectedLensType('');
+    setBasePrice('');
+    refreshOptions();
   };
 
   const handleAddIndex = async () => {
@@ -100,26 +305,83 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
     await addBrandLensIndex({
       brand_id: selectedBrandId,
       index_value: indexValue,
-      price_adder: indexAdder,
+      price_adder: Number(indexAdder),
       description: indexDesc,
     });
-    fetchSelectedBrandOptions(selectedBrandId);
+    setIndexValue('1.56');
+    setIndexAdder('');
+    setIndexDesc('');
+    refreshOptions();
   };
 
   const handleAddColor = async () => {
     if (!selectedBrandId || !colorName) return;
-    await addBrandLensColor(selectedBrandId, colorName, colorAdder);
+    await addBrandLensColor(selectedBrandId, colorName, Number(colorAdder));
     setColorName('');
-    setColorAdder(0);
-    fetchSelectedBrandOptions(selectedBrandId);
+    setColorAdder('');
+    refreshOptions();
   };
 
   const handleAddCoating = async () => {
     if (!selectedBrandId || !coatingName) return;
-    await addBrandLensCoating(selectedBrandId, coatingName, coatingAdder);
+    await addBrandLensCoating(selectedBrandId, coatingName, Number(coatingAdder));
     setCoatingName('');
-    setCoatingAdder(0);
-    fetchSelectedBrandOptions(selectedBrandId);
+    setCoatingAdder('');
+    refreshOptions();
+  };
+
+  // --- Delete Handlers ---
+  const handleDeleteLensType = async (id: string) => {
+    setDeletingId(id);
+    await deleteBrandLensType(id);
+    setDeletingId(null);
+    refreshOptions();
+  };
+
+  const handleDeleteIndex = async (id: string) => {
+    setDeletingId(id);
+    await deleteBrandLensIndex(id);
+    setDeletingId(null);
+    refreshOptions();
+  };
+
+  const handleDeleteColor = async (id: string) => {
+    setDeletingId(id);
+    await deleteBrandLensColor(id);
+    setDeletingId(null);
+    refreshOptions();
+  };
+
+  const handleDeleteCoating = async (id: string) => {
+    setDeletingId(id);
+    await deleteBrandLensCoating(id);
+    setDeletingId(null);
+    refreshOptions();
+  };
+
+  // --- Update Handlers ---
+  const handleUpdateLensType = async (id: string, basePrice: number) => {
+    await updateBrandLensType(id, basePrice);
+    setEditingId(null);
+    refreshOptions();
+  };
+
+  const handleUpdateIndex = async (id: string, payload: { index_value?: string; price_adder?: number; description?: string }) => {
+    await updateBrandLensIndex(id, payload);
+    setEditingId(null);
+    refreshOptions();
+  };
+
+  const handleUpdateColor = async (id: string, name: string, adder: number) => {
+    await updateBrandLensColor(id, name, adder);
+    setEditingId(null);
+    refreshOptions();
+  };
+
+  const handleUpdateCoating = async (id: string, name: string, adder: number) => {
+    await updateBrandLensCoating(id, name, adder);
+    setEditingId(null);
+    refreshOptions();
   };
 
   return (
@@ -230,14 +492,43 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
                   type="number"
                   placeholder="Harga Dasar (Rp)"
                   value={basePrice}
-                  onChange={(e) => setBasePrice(Number(e.target.value))}
+                  onChange={(e) => setBasePrice(e.target.value === '' ? '' : Number(e.target.value))}
                   className="bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
                 />
 
-                <button onClick={handleSetLensType} className="bg-emerald-700 hover:bg-emerald-600 text-charcoal-900 font-semibold rounded-sm px-4 py-2">
+                <button onClick={handleSetLensType} className="bg-charcoal-900 hover:bg-stone-800 text-cream-50 font-semibold rounded-sm px-4 py-2 transition">
                   Set Tipe & Harga
                 </button>
               </div>
+
+              {/* Display configured lens types */}
+              {brandOptions.lensTypes.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-cream-200">
+                  <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Tipe Terkonfigurasi:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {brandOptions.lensTypes.map((lt) =>
+                      editingId === lt.id ? (
+                        <InlineEditLensType
+                          key={lt.id}
+                          item={lt}
+                          onSave={handleUpdateLensType}
+                          onCancel={() => setEditingId(null)}
+                        />
+                      ) : (
+                        <EditableItemCard
+                          key={lt.id}
+                          id={lt.id}
+                          label={lt.lens_type?.name || 'Unknown'}
+                          sublabel={`Rp ${Number(lt.base_price).toLocaleString('id-ID')}`}
+                          onDelete={handleDeleteLensType}
+                          onEdit={setEditingId}
+                          isDeleting={deletingId}
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 2. Atur Ketebalan / Index Lensa */}
@@ -259,7 +550,7 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
                   type="number"
                   placeholder="+Harga (Rp)"
                   value={indexAdder}
-                  onChange={(e) => setIndexAdder(Number(e.target.value))}
+                  onChange={(e) => setIndexAdder(e.target.value === '' ? '' : Number(e.target.value))}
                   className="bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
                 />
                 <input
@@ -269,18 +560,39 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
                   onChange={(e) => setIndexDesc(e.target.value)}
                   className="bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
                 />
-                <button onClick={handleAddIndex} className="bg-charcoal-900 hover:bg-stone-800 text-cream-50 font-semibold rounded-sm px-3 py-2">
+                <button onClick={handleAddIndex} className="bg-charcoal-900 hover:bg-stone-800 text-cream-50 font-semibold rounded-sm px-3 py-2 transition">
                   + Index
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-2">
-                {brandOptions.indexes.map((idx) => (
-                  <span key={idx.id} className="bg-cream-100 border border-cream-300 px-3 py-1.5 rounded-lg text-xs text-stone-600">
-                    Index {idx.index_value} (+Rp {Number(idx.price_adder).toLocaleString('id-ID')})
-                  </span>
-                ))}
-              </div>
+              {/* Display configured indexes */}
+              {brandOptions.indexes.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-cream-200">
+                  <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Index Terkonfigurasi:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {brandOptions.indexes.map((idx) =>
+                      editingId === idx.id ? (
+                        <InlineEditIndex
+                          key={idx.id}
+                          item={idx}
+                          onSave={handleUpdateIndex}
+                          onCancel={() => setEditingId(null)}
+                        />
+                      ) : (
+                        <EditableItemCard
+                          key={idx.id}
+                          id={idx.id}
+                          label={`Index ${idx.index_value}`}
+                          sublabel={`+Rp ${Number(idx.price_adder).toLocaleString('id-ID')}${idx.description ? ` · ${idx.description}` : ''}`}
+                          onDelete={handleDeleteIndex}
+                          onEdit={setEditingId}
+                          isDeleting={deletingId}
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 3. Atur Opsi Warna & Coating */}
@@ -303,20 +615,44 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
                     type="number"
                     placeholder="+Harga Warna (Rp)"
                     value={colorAdder}
-                    onChange={(e) => setColorAdder(Number(e.target.value))}
+                    onChange={(e) => setColorAdder(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
                   />
-                  <button onClick={handleAddColor} className="w-full bg-cream-200 hover:bg-cream-300 text-charcoal-900 py-2 rounded-sm">
+                  <button onClick={handleAddColor} className="w-full bg-cream-200 hover:bg-cream-300 text-charcoal-900 py-2 rounded-sm transition">
                     + Tambah Warna
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {brandOptions.colors.map((c) => (
-                    <span key={c.id} className="bg-cream-100 border border-cream-300 px-2.5 py-1 rounded-lg text-xs text-stone-600">
-                      {c.color_name} (+Rp {Number(c.price_adder).toLocaleString('id-ID')})
-                    </span>
-                  ))}
-                </div>
+
+                {/* Display configured colors */}
+                {brandOptions.colors.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-cream-200">
+                    <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Warna Terkonfigurasi:</p>
+                    <div className="space-y-2">
+                      {brandOptions.colors.map((c) =>
+                        editingId === c.id ? (
+                          <InlineEditSimple
+                            key={c.id}
+                            name={c.color_name}
+                            adder={c.price_adder}
+                            nameLabel="Nama Warna"
+                            onSave={async (name, adder) => handleUpdateColor(c.id, name, adder)}
+                            onCancel={() => setEditingId(null)}
+                          />
+                        ) : (
+                          <EditableItemCard
+                            key={c.id}
+                            id={c.id}
+                            label={c.color_name}
+                            sublabel={`+Rp ${Number(c.price_adder).toLocaleString('id-ID')}`}
+                            onDelete={handleDeleteColor}
+                            onEdit={setEditingId}
+                            isDeleting={deletingId}
+                          />
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Coating */}
@@ -337,20 +673,44 @@ export default function LensMatrixTab({ masterData, onRefresh }: Props) {
                     type="number"
                     placeholder="+Harga Coating (Rp)"
                     value={coatingAdder}
-                    onChange={(e) => setCoatingAdder(Number(e.target.value))}
+                    onChange={(e) => setCoatingAdder(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
                   />
-                  <button onClick={handleAddCoating} className="w-full bg-cream-200 hover:bg-cream-300 text-charcoal-900 py-2 rounded-sm">
+                  <button onClick={handleAddCoating} className="w-full bg-cream-200 hover:bg-cream-300 text-charcoal-900 py-2 rounded-sm transition">
                     + Tambah Coating
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {brandOptions.coatings.map((ct) => (
-                    <span key={ct.id} className="bg-cream-100 border border-cream-300 px-2.5 py-1 rounded-lg text-xs text-stone-600">
-                      {ct.coating_name} (+Rp {Number(ct.price_adder).toLocaleString('id-ID')})
-                    </span>
-                  ))}
-                </div>
+
+                {/* Display configured coatings */}
+                {brandOptions.coatings.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-cream-200">
+                    <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Coating Terkonfigurasi:</p>
+                    <div className="space-y-2">
+                      {brandOptions.coatings.map((ct) =>
+                        editingId === ct.id ? (
+                          <InlineEditSimple
+                            key={ct.id}
+                            name={ct.coating_name}
+                            adder={ct.price_adder}
+                            nameLabel="Nama Coating"
+                            onSave={async (name, adder) => handleUpdateCoating(ct.id, name, adder)}
+                            onCancel={() => setEditingId(null)}
+                          />
+                        ) : (
+                          <EditableItemCard
+                            key={ct.id}
+                            id={ct.id}
+                            label={ct.coating_name}
+                            sublabel={`+Rp ${Number(ct.price_adder).toLocaleString('id-ID')}`}
+                            onDelete={handleDeleteCoating}
+                            onEdit={setEditingId}
+                            isDeleting={deletingId}
+                          />
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </>

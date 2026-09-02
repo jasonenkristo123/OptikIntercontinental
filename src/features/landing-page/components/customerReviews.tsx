@@ -5,19 +5,19 @@ import { Star, CheckCircle } from 'lucide-react';
 const REVIEWS = [
   {
     name: 'Budi Santoso',
-    role: 'Verified Buyer',
+    role: 'Pembeli Terverifikasi',
     comment: 'Proses pemesanan via WA sangat cepat. Kacamata Titanium-nya sangat ringan dan lensa Blue Protect-nya terasa adem saat dipakai coding seharian.',
     rating: 5,
   },
   {
     name: 'Siti Rahmawati',
-    role: 'Verified Buyer',
+    role: 'Pembeli Terverifikasi',
     comment: 'Awalnya ragu beli kacamata online, tapi wizard kalkulator lensanya sangat membantu menentukan ketebalan index 1.67 untuk minus tinggi saya.',
     rating: 5,
   },
   {
     name: 'Michael Tan',
-    role: 'Verified Buyer',
+    role: 'Pembeli Terverifikasi',
     comment: 'Lensa Progressive-nya sangat presisi. CS di WhatsApp ramah dan langsung mengonfirmasi status pembayaran QRIS.',
     rating: 5,
   },
@@ -27,9 +27,9 @@ export default function CustomerReviews() {
   return (
     <section className="max-w-7xl mx-auto px-6 py-16 space-y-10">
       <div className="text-center space-y-2">
-        <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Testimonials</p>
+        <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Testimoni</p>
         <h2 className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900">
-          Trusted by Eyewear Wearers
+          Dipercaya oleh Pengguna Kacamata
         </h2>
       </div>
 

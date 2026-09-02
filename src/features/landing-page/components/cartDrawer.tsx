@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useCartStore } from '@/shared/store/useCartStore';
 import { createOrder } from '@/app/actions/orderActions';
 import { X, Trash2, MessageSquare, Clock } from 'lucide-react';
+import Image from 'next/image';
+import type { LensSelectionDetails } from '@/shared/types/database';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, clearCart, remainingSeconds } = useCartStore();
@@ -30,14 +32,14 @@ export default function CartDrawer() {
     try {
       const newOrder = await createOrder({
         contactInfo: whatsappNumber,
-        customerProfile: items[0]?.customerProfile || {},
-        prescriptionData: items[0]?.prescriptionData || {},
+        customerProfile: items[0]?.customerProfile ?? { ageGroup: '', hasBoughtBefore: false },
+        prescriptionData: items[0]?.prescriptionData ?? { method: 'IN_STORE_EXAM' },
         items: items.map(item => ({
           id: item.id,
           frameId: item.frameId,
           frameName: item.frameName,
           framePrice: item.framePrice,
-          lensDetails: item.lensDetails as any, // Bypass strict LensSelectionDetails for now if IDs are missing
+          lensDetails: item.lensDetails as LensSelectionDetails,
           totalItemPrice: item.totalPrice,
         })),
         totalPrice: totalPrice,
@@ -63,8 +65,12 @@ export default function CartDrawer() {
       clearCart();
       closeCart();
       window.open(waUrl, '_blank');
-    } catch (err: any) {
-      alert(err.message || 'Gagal memproses pesanan.');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message || 'Gagal memproses pesanan.');
+      } else {
+        alert('Gagal memproses pesanan.');
+      }
     } finally {
       setLoading(false);
     }
@@ -77,7 +83,7 @@ export default function CartDrawer() {
         {/* Header Drawer */}
         <div className="p-6 border-b border-cream-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="font-serif text-lg font-bold">Your Selection</h2>
+            <h2 className="font-serif text-lg font-bold">Pilihan Anda</h2>
             <span className="text-xs font-mono text-stone-500">({items.length})</span>
           </div>
           <button onClick={closeCart} className="p-2 text-stone-500 hover:text-charcoal-900">
@@ -90,7 +96,7 @@ export default function CartDrawer() {
           <div className="bg-amber-100/80 border-b border-amber-200 px-6 py-2.5 flex items-center justify-between text-xs text-amber-900">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-700 animate-pulse" />
-              <span>Stock reservation timer:</span>
+              <span>Waktu reservasi stok:</span>
             </div>
             <span className="font-mono font-bold text-amber-800">{formatTimer(remainingSeconds)}</span>
           </div>
@@ -100,13 +106,15 @@ export default function CartDrawer() {
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {items.length === 0 ? (
             <div className="text-center py-20 text-stone-500 font-light text-sm">
-              Your bag is currently empty.
+              Keranjang Anda saat ini kosong.
             </div>
           ) : (
             items.map((item) => (
               <div key={item.id} className="bg-white p-4 rounded-sm border border-cream-300 flex gap-4 text-xs">
                 {item.frameImage && (
-                  <img src={item.frameImage} alt="" className="w-16 h-16 object-cover bg-cream-100 rounded-sm" />
+                  <div className="relative w-16 h-16 shrink-0">
+                    <Image src={item.frameImage} alt="" fill className="object-cover bg-cream-100 rounded-sm" />
+                  </div>
                 )}
                 <div className="flex-1 space-y-1">
                   <div className="font-serif font-bold text-sm">{item.frameName || 'Custom Lens Only'}</div>
@@ -137,11 +145,11 @@ export default function CartDrawer() {
 
             <div>
               <label className="block text-xs font-semibold text-stone-600 mb-1">
-                WhatsApp / Mobile Number
+                Nomor WhatsApp / HP
               </label>
               <input
                 type="text"
-                placeholder="e.g. 08123456789"
+                placeholder="Contoh: 08123456789"
                 value={whatsappNumber}
                 onChange={(e) => setWhatsappNumber(e.target.value)}
                 className="w-full bg-white border border-cream-300 rounded-sm px-3 py-2 text-xs focus:outline-none focus:border-charcoal-900"
@@ -154,7 +162,7 @@ export default function CartDrawer() {
               className="w-full bg-charcoal-900 hover:bg-stone-800 text-cream-50 py-3.5 rounded-sm text-xs font-semibold tracking-wider uppercase flex items-center justify-center gap-2 transition"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Send Order via WhatsApp</span>
+              <span>Kirim Pesanan via WhatsApp</span>
             </button>
           </div>
         )}

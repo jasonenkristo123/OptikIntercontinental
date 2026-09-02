@@ -40,7 +40,12 @@ export async function getMatchingBrandsForWizard(budgetRangeId: string, lensType
 export async function getBrandMatrixOptions(brandId: string) {
   const supabase = await createAdminClient();
 
-  const [indexes, colors, coatings] = await Promise.all([
+  const [lensTypes, indexes, colors, coatings] = await Promise.all([
+    supabase
+      .from('brand_lens_types')
+      .select('*, lens_type:lens_types(id, name)')
+      .eq('brand_id', brandId)
+      .eq('is_available', true),
     supabase
       .from('brand_lens_indexes')
       .select('*')
@@ -60,6 +65,7 @@ export async function getBrandMatrixOptions(brandId: string) {
   ]);
 
   return {
+    lensTypes: (lensTypes.data || []) as (BrandLensType & { lens_type: { id: string; name: string } })[],
     indexes: (indexes.data || []) as BrandLensIndex[],
     colors: (colors.data || []) as BrandLensColor[],
     coatings: (coatings.data || []) as BrandLensCoating[],
@@ -155,4 +161,99 @@ export async function addBrandLensCoating(
   if (error) throw new Error(error.message);
   revalidatePath('/admin');
   return data as BrandLensCoating;
+}
+
+// --- DELETE actions (soft-delete via is_available = false) ---
+
+export async function deleteBrandLensType(id: string) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_types')
+    .update({ is_available: false })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+}
+
+export async function deleteBrandLensIndex(id: string) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_indexes')
+    .update({ is_available: false })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+}
+
+export async function deleteBrandLensColor(id: string) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_colors')
+    .update({ is_available: false })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+}
+
+export async function deleteBrandLensCoating(id: string) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_coatings')
+    .update({ is_available: false })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+}
+
+// --- UPDATE actions ---
+
+export async function updateBrandLensType(id: string, basePrice: number) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_types')
+    .update({ base_price: basePrice })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+}
+
+export async function updateBrandLensIndex(
+  id: string,
+  payload: { price_adder?: number; description?: string; index_value?: string }
+) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_indexes')
+    .update(payload)
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+}
+
+export async function updateBrandLensColor(
+  id: string,
+  colorName: string,
+  priceAdder: number
+) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_colors')
+    .update({ color_name: colorName, price_adder: priceAdder })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+}
+
+export async function updateBrandLensCoating(
+  id: string,
+  coatingName: string,
+  priceAdder: number
+) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('brand_lens_coatings')
+    .update({ coating_name: coatingName, price_adder: priceAdder })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
 }

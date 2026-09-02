@@ -5,6 +5,7 @@ import { Frame } from '@/shared/types/database';
 import { useCartStore } from '@/shared/store/useCartStore';
 import { useWizardStore } from '@/shared/store/useWizardStore';
 import { Sparkles, SlidersHorizontal } from 'lucide-react';
+import Image from 'next/image';
 
 interface Props {
   frames: Frame[];
@@ -45,9 +46,9 @@ export default function FrameCatalog({ frames }: Props) {
       {/* Section Header & Top Filter Bar */}
       <div className="space-y-6">
         <div>
-          <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Eyewear Collection</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Koleksi Kacamata</p>
           <h2 className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900 mt-1">
-            Curated Frames
+            Bingkai Pilihan
           </h2>
         </div>
 
@@ -69,7 +70,7 @@ export default function FrameCatalog({ frames }: Props) {
                     : 'bg-cream-50 text-stone-700 hover:bg-cream-100'
                 }`}
               >
-                {cat}
+                {cat === 'All' ? 'Semua' : cat === 'Men' ? 'Pria' : cat === 'Women' ? 'Wanita' : cat === 'Kids' ? 'Anak' : cat}
               </button>
             ))}
           </div>
@@ -81,7 +82,7 @@ export default function FrameCatalog({ frames }: Props) {
               onChange={(e) => setSelectedMaterial(e.target.value)}
               className="bg-cream-50 border border-cream-300 rounded-lg px-3 py-1.5 text-stone-700 focus:outline-none"
             >
-              <option value="All">All Materials</option>
+              <option value="All">Semua Material</option>
               <option value="Acetate">Acetate</option>
               <option value="Metal">Metal</option>
               <option value="Titanium">Titanium</option>
@@ -89,7 +90,7 @@ export default function FrameCatalog({ frames }: Props) {
             </select>
 
             <div className="flex items-center gap-2 text-stone-600 font-mono text-[11px]">
-              <span>Max Price:</span>
+              <span>Harga Maks:</span>
               <input
                 type="range"
                 min={200000}
@@ -110,7 +111,7 @@ export default function FrameCatalog({ frames }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredFrames.length === 0 ? (
           <div className="col-span-full text-center py-16 text-stone-500 font-light text-sm">
-            No frames match your selected criteria.
+            Tidak ada bingkai yang cocok dengan kriteria pilihan Anda.
           </div>
         ) : (
           filteredFrames.map((frame) => (
@@ -120,10 +121,11 @@ export default function FrameCatalog({ frames }: Props) {
             >
               {/* Image Box */}
               <div className="relative aspect-[4/3] bg-cream-200/50 overflow-hidden">
-                <img
+                <Image
                   src={frame.image_url}
                   alt={frame.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  fill
+                  className="object-cover group-hover:scale-105 transition duration-500"
                 />
 
                 {/* Top-Right Authenticity Badge */}
@@ -142,8 +144,8 @@ export default function FrameCatalog({ frames }: Props) {
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-xs text-stone-500 font-mono mb-1">
-                    <span>Category: {frame.category?.name}</span>
-                    <span className="text-amber-700 font-semibold">Only {frame.stock} Left</span>
+                    <span>Kategori: {frame.category?.name}</span>
+                    <span className="text-amber-700 font-semibold">Tersisa {frame.stock}</span>
                   </div>
                   <h3 className="font-serif text-lg font-bold text-charcoal-900">{frame.name}</h3>
                   <p className="font-serif font-bold text-charcoal-900 text-base mt-2">
@@ -157,13 +159,13 @@ export default function FrameCatalog({ frames }: Props) {
                     onClick={() => handleBuyFrameOnly(frame)}
                     className="border border-charcoal-900 text-charcoal-900 hover:bg-charcoal-900 hover:text-cream-50 font-medium py-2.5 rounded-sm transition text-center"
                   >
-                    Buy Frame Only
+                    Beli Bingkai Saja
                   </button>
                   <button
                     onClick={() => openWizard(frame, 1)}
                     className="bg-charcoal-900 text-cream-50 hover:bg-stone-800 font-medium py-2.5 rounded-sm transition text-center"
                   >
-                    Customize Lenses
+                    Sesuaikan Lensa
                   </button>
                 </div>
               </div>
