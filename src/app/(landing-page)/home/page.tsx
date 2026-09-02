@@ -1,9 +1,8 @@
+import { getFrames } from "@/app/actions/frameActions";
 import HomeContainer from "@/features/landing-page/container/HomeContainer";
 
-export default function Home() {
-    return (
-        <main>
-            <HomeContainer />
-        </main>
-    )
+export default async function Home() {
+    const frames = await getFrames();
+
+    return <HomeContainer frames={frames} />
 }
