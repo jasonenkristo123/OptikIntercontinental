@@ -50,6 +50,7 @@ export interface LensBrand {
   name: string;
   budget_range_id: string;
   description?: string;
+  logo_url?: string;
   is_active: boolean;
   budget_range?: BudgetRange;
 }
@@ -69,6 +70,8 @@ export interface BrandLensIndex {
   brand_id: string;
   index_value: string;
   price_adder: number;
+  color_id?: string | null;
+  coating_id?: string | null;
   rec_sph_min?: number;
   rec_sph_max?: number;
   rec_cyl_max?: number;
@@ -80,6 +83,8 @@ export interface CreateLensIndexPayload {
   brand_id: string;
   index_value: string;
   price_adder: number;
+  color_id?: string | null;
+  coating_id?: string | null;
   rec_sph_min?: number;
   rec_sph_max?: number;
   rec_cyl_max?: number;
@@ -117,6 +122,7 @@ export interface PrescriptionData {
   axisRight?: number;
   axisLeft?: number;
   pd?: number;
+  addition?: number;
   approximateRange?: string;
 }
 

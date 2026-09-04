@@ -46,16 +46,33 @@ export default function CartDrawer() {
       });
 
       // 2. Format pesan WhatsApp
+      const rx = items[0]?.prescriptionData;
+      let prescriptionText = '';
+      if (rx?.method === 'EXACT') {
+        prescriptionText =
+          `\n📋 DATA UKURAN MATA:\n` +
+          `   Mata Kanan (OD): SPH ${rx.sphRight ?? 0 >= 0 ? '+' : ''}${rx.sphRight ?? 0} | CYL ${rx.cylRight ?? 0} | Axis ${rx.axisRight ?? 0}°\n` +
+          `   Mata Kiri  (OS): SPH ${rx.sphLeft ?? 0 >= 0 ? '+' : ''}${rx.sphLeft ?? 0} | CYL ${rx.cylLeft ?? 0} | Axis ${rx.axisLeft ?? 0}°\n` +
+          `   PD: ${rx.pd ?? 0} mm${(rx.addition ?? 0) > 0 ? ` | ADD: +${rx.addition}` : ''}\n`;
+      } else if (rx?.method === 'IN_STORE_EXAM') {
+        prescriptionText = `\n📋 UKURAN MATA: Pemeriksaan Gratis di Toko\n`;
+      }
+
       const text = `Halo CS Optik Intercontinental, saya ingin memesan:\n\n` +
         `📌 ORDER ID: #${newOrder.id}\n` +
         `-----------------------------------\n` +
         items.map((item) => {
           let textItem = `🕶️ ${item.frameName || 'Lenses Only'} - Rp ${item.totalPrice.toLocaleString('id-ID')}\n`;
           if (item.lensDetails) {
-            textItem += `   🔍 Lensa: ${item.lensDetails.brandName} (${item.lensDetails.lensTypeName})\n`;
+            textItem += `   🔍 Merek: ${item.lensDetails.brandName} (${item.lensDetails.lensTypeName})\n`;
+            if (item.lensDetails.indexValue) textItem += `   📐 Indeks: ${item.lensDetails.indexValue}\n`;
+            if (item.lensDetails.colorName) textItem += `   🎨 Warna: ${item.lensDetails.colorName}\n`;
+            if (item.lensDetails.coatingName) textItem += `   🛡️ Coating: ${item.lensDetails.coatingName}\n`;
           }
           return textItem;
         }).join('\n') +
+        `-----------------------------------\n` +
+        prescriptionText +
         `-----------------------------------\n` +
         `💰 TOTAL HARGA: Rp ${totalPrice.toLocaleString('id-ID')}\n\n` +
         `Mohon infokan lokasi toko dan link QRIS untuk pembayaran. Terima kasih!`;

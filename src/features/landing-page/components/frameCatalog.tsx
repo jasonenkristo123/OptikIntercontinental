@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Frame } from '@/shared/types/database';
 import { useCartStore } from '@/shared/store/useCartStore';
 import { useWizardStore } from '@/shared/store/useWizardStore';
-import { Sparkles, SlidersHorizontal } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 interface Props {
@@ -17,9 +17,38 @@ export default function FrameCatalog({ frames }: Props) {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedMaterial, setSelectedMaterial] = useState<string>('All');
-  const [maxPrice, setMaxPrice] = useState<number>(2000000);
+  
+  const uniqueMaterials = useMemo(() => {
+    const materials = new Set<string>();
+    frames.forEach(f => {
+      if (f.material?.name) materials.add(f.material.name);
+    });
+    return Array.from(materials).sort();
+  }, [frames]);
 
-  // Filter Logic
+  const uniqueCategories = useMemo(() => {
+    const categories = new Set<string>();
+    frames.forEach(f => {
+      if (f.category?.name) categories.add(f.category.name);
+    });
+    return Array.from(categories).sort();
+  }, [frames]);
+
+  const absoluteMaxPrice = useMemo(() => {
+    if (!frames || frames.length === 0) return 2000000;
+    const max = Math.max(...frames.map(f => Number(f.price) || 0));
+    return Math.max(2000000, Math.ceil(max / 100000) * 100000); 
+  }, [frames]);
+
+  const [maxPrice, setMaxPrice] = useState<number>(absoluteMaxPrice);
+
+  useEffect(() => {
+    setMaxPrice(absoluteMaxPrice);
+  }, [absoluteMaxPrice]);
+  
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 9;
+
   const filteredFrames = useMemo(() => {
     return frames.filter((frame) => {
       const matchCat = selectedCategory === 'All' || frame.category?.name === selectedCategory;
@@ -28,6 +57,13 @@ export default function FrameCatalog({ frames }: Props) {
       return matchCat && matchMat && matchPrice;
     });
   }, [frames, selectedCategory, selectedMaterial, maxPrice]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedMaterial, maxPrice]);
+
+  const totalPages = Math.ceil(filteredFrames.length / itemsPerPage) || 1;
+  const paginatedFrames = filteredFrames.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleBuyFrameOnly = (frame: Frame) => {
     addItem({
@@ -41,9 +77,7 @@ export default function FrameCatalog({ frames }: Props) {
   };
 
   return (
-    <section id="frames" className="max-w-7xl mx-auto px-6 py-16 space-y-10">
-      
-      {/* Section Header & Top Filter Bar */}
+    <section id="frames" className="max-w-7xl mx-auto px-6 py-16 space-y-10">      
       <div className="space-y-6">
         <div>
           <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Koleksi Kacamata</p>
@@ -52,15 +86,13 @@ export default function FrameCatalog({ frames }: Props) {
           </h2>
         </div>
 
-        {/* Filter Bar Controls */}
         <div className="bg-cream-200/60 p-4 rounded-xl border border-cream-300/80 flex flex-wrap gap-4 items-center justify-between text-xs">
           
-          {/* Category Filter */}
           <div className="flex flex-wrap gap-1.5 items-center">
             <span className="text-stone-500 font-medium mr-2 flex items-center gap-1">
               <SlidersHorizontal className="w-3.5 h-3.5" /> Target:
             </span>
-            {['All', 'Men', 'Women', 'Kids', 'Unisex'].map((cat) => (
+            {['All', ...uniqueCategories].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
@@ -83,10 +115,11 @@ export default function FrameCatalog({ frames }: Props) {
               className="bg-cream-50 border border-cream-300 rounded-lg px-3 py-1.5 text-stone-700 focus:outline-none"
             >
               <option value="All">Semua Material</option>
-              <option value="Acetate">Acetate</option>
-              <option value="Metal">Metal</option>
-              <option value="Titanium">Titanium</option>
-              <option value="TR90">TR90</option>
+              {uniqueMaterials.map((mat) => (
+                <option key={mat} value={mat}>
+                  {mat}
+                </option>
+              ))}
             </select>
 
             <div className="flex items-center gap-2 text-stone-600 font-mono text-[11px]">
@@ -94,13 +127,13 @@ export default function FrameCatalog({ frames }: Props) {
               <input
                 type="range"
                 min={200000}
-                max={2000000}
+                max={absoluteMaxPrice}
                 step={50000}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="accent-charcoal-900 cursor-pointer"
               />
-              <span className="font-bold text-charcoal-900">Rp {(maxPrice / 1000).toFixed(0)}k</span>
+              <span className="font-bold text-charcoal-900">Rp {maxPrice.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
@@ -114,7 +147,7 @@ export default function FrameCatalog({ frames }: Props) {
             Tidak ada bingkai yang cocok dengan kriteria pilihan Anda.
           </div>
         ) : (
-          filteredFrames.map((frame) => (
+          paginatedFrames.map((frame) => (
             <div
               key={frame.id}
               className="bg-cream-50 border border-cream-300/80 rounded-sm overflow-hidden flex flex-col justify-between group hover:border-charcoal-900/40 transition duration-300 shadow-sm"
@@ -128,15 +161,31 @@ export default function FrameCatalog({ frames }: Props) {
                   className="object-cover group-hover:scale-105 transition duration-500"
                 />
 
-                {/* Top-Right Authenticity Badge */}
-                <div className="absolute top-3 right-3 bg-charcoal-900/90 text-cream-50 text-[10px] font-mono tracking-wider px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-300" />
-                  <span>{frame.authenticity?.name || '100% Original'}</span>
-                </div>
+                {/* Top-Right Authenticity Badge / Logo */}
+                {frame.authenticity?.name?.toLowerCase().includes('original') && (
+                  <div className="absolute top-3 right-3">
+                    {frame.authenticity.has_logo && frame.authenticity.logo_url ? (
+                      <div className="bg-white/90 p-1.5 rounded shadow-sm backdrop-blur-sm border border-cream-200">
+                        <Image
+                          src={frame.authenticity.logo_url}
+                          alt={frame.authenticity.name}
+                          width={40}
+                          height={16}
+                          className="object-contain h-4 w-auto"
+                        />
+                      </div>
+                    ) : (
+                      <div className="bg-charcoal-900/90 text-cream-50 text-[10px] font-mono tracking-wider px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-300" />
+                        <span>{frame.authenticity.name}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Bottom-Left Material Badge */}
-                <div className="absolute bottom-3 left-3 bg-cream-50/90 text-charcoal-900 text-[10px] font-mono uppercase px-2 py-0.5 rounded border border-cream-300">
-                  {frame.material?.name || 'Titanium'}
+                <div className="absolute bottom-3 left-3 text-charcoal-900 text-xs md:text-lg font-bold uppercase px-2 py-0.5 ">
+                  {frame.material?.name}
                 </div>
               </div>
 
@@ -165,15 +214,38 @@ export default function FrameCatalog({ frames }: Props) {
                     onClick={() => openWizard(frame, 1)}
                     className="bg-charcoal-900 text-cream-50 hover:bg-stone-800 font-medium py-2.5 rounded-sm transition text-center"
                   >
-                    Sesuaikan Lensa
+                    Beli Dengan Lensa
                   </button>
                 </div>
               </div>
-
             </div>
           ))
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-12">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="p-2 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          
+          <span className="text-sm font-medium text-charcoal-900">
+            Halaman {currentPage} dari {totalPages}
+          </span>
+          
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
 
     </section>
   );

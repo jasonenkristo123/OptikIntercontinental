@@ -21,6 +21,7 @@ export default function MasterLookupTab({ data, onRefresh }: Props) {
   const [newMaterial, setNewMaterial] = useState('');
   const [newAuthName, setNewAuthName] = useState('');
   const [hasLogo, setHasLogo] = useState(false);
+  const [newAuthLogoUrl, setNewAuthLogoUrl] = useState('');
   const [newLensType, setNewLensType] = useState('');
 
   const handleAddCategory = async () => {
@@ -39,8 +40,10 @@ export default function MasterLookupTab({ data, onRefresh }: Props) {
 
   const handleAddAuth = async () => {
     if (!newAuthName.trim()) return;
-    await createAuthenticityTag(newAuthName, hasLogo);
+    await createAuthenticityTag(newAuthName, hasLogo, hasLogo ? newAuthLogoUrl : undefined);
     setNewAuthName('');
+    setHasLogo(false);
+    setNewAuthLogoUrl('');
     onRefresh();
   };
 
@@ -117,21 +120,32 @@ export default function MasterLookupTab({ data, onRefresh }: Props) {
       {/* Tag Keaslian */}
       <div className="bg-cream-50 border border-cream-300 p-5 rounded-sm space-y-3">
         <h3 className="font-serif font-normal text-charcoal-900 text-base">Tag Keaslian (Authenticity)</h3>
-        <div className="flex gap-2 items-center">
-          <input
-            type="text"
-            placeholder="Tag Keaslian baru"
-            value={newAuthName}
-            onChange={(e) => setNewAuthName(e.target.value)}
-            className="flex-1 bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
-          />
-          <label className="flex items-center gap-1.5 text-xs text-stone-500">
-            <input type="checkbox" checked={hasLogo} onChange={(e) => setHasLogo(e.target.checked)} />
-            Logo
-          </label>
-          <button onClick={handleAddAuth} className="bg-charcoal-900 px-3 py-2 rounded-sm text-cream-50">
-            <Plus className="w-4 h-4" />
-          </button>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="Tag Keaslian baru"
+              value={newAuthName}
+              onChange={(e) => setNewAuthName(e.target.value)}
+              className="flex-1 bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
+            />
+            <label className="flex items-center gap-1.5 text-xs text-stone-500 whitespace-nowrap">
+              <input type="checkbox" checked={hasLogo} onChange={(e) => setHasLogo(e.target.checked)} />
+              Logo
+            </label>
+            <button onClick={handleAddAuth} className="bg-charcoal-900 px-3 py-2 rounded-sm text-cream-50 shrink-0">
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          {hasLogo && (
+            <input
+              type="text"
+              placeholder="URL Gambar Logo (https://...)"
+              value={newAuthLogoUrl}
+              onChange={(e) => setNewAuthLogoUrl(e.target.value)}
+              className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900 text-xs"
+            />
+          )}
         </div>
         <div className="flex flex-wrap gap-2 pt-2">
           {data.authenticity.map((a) => (

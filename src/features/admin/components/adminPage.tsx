@@ -36,7 +36,9 @@ import {
   Trash2,
   Plus,
   RefreshCw,
-  Edit2
+  Edit2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import LensMatrixTab from './lensMatrixTab';
 import Image from 'next/image';
@@ -52,6 +54,17 @@ export default function AdminDashboardPage() {
   // Data States
   const [orders, setOrders] = useState<Order[]>([]);
   const [frames, setFrames] = useState<Frame[]>([]);
+
+  // Pagination States
+  const [orderPage, setOrderPage] = useState(1);
+  const [framePage, setFramePage] = useState(1);
+  const itemsPerPage = 10;
+
+  const paginatedOrders = orders.slice((orderPage - 1) * itemsPerPage, orderPage * itemsPerPage);
+  const totalOrderPages = Math.ceil(orders.length / itemsPerPage) || 1;
+
+  const paginatedFrames = frames.slice((framePage - 1) * itemsPerPage, framePage * itemsPerPage);
+  const totalFramePages = Math.ceil(frames.length / itemsPerPage) || 1;
   const [masterData, setMasterData] = useState<{
     categories: MasterItem[];
     materials: MasterItem[];
@@ -187,7 +200,7 @@ export default function AdminDashboardPage() {
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order) => (
+                  paginatedOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-cream-200/50 transition">
                       <td className="p-4 font-mono font-bold text-charcoal-900">
                         {order.id}
@@ -260,6 +273,34 @@ export default function AdminDashboardPage() {
               </tbody>
             </table>
           </div>
+          
+          {/* Order Pagination Controls */}
+          {totalOrderPages > 1 && (
+            <div className="flex items-center justify-between p-4 border-t border-cream-300 bg-cream-50">
+              <span className="text-sm text-stone-500">
+                Menampilkan {(orderPage - 1) * itemsPerPage + 1} - {Math.min(orderPage * itemsPerPage, orders.length)} dari {orders.length} pesanan
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setOrderPage(p => Math.max(1, p - 1))}
+                  disabled={orderPage === 1}
+                  className="p-1.5 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm font-medium text-charcoal-900 px-2">
+                  Halaman {orderPage} dari {totalOrderPages}
+                </span>
+                <button
+                  onClick={() => setOrderPage(p => Math.min(totalOrderPages, p + 1))}
+                  disabled={orderPage === totalOrderPages}
+                  className="p-1.5 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -280,7 +321,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {frames.map((frame) => (
+            {paginatedFrames.map((frame) => (
               <div key={frame.id} className="bg-cream-50 border border-cream-300 rounded-sm overflow-hidden p-4 flex gap-4 items-center">
                 <div className="relative w-20 h-20 shrink-0">
                   <Image
@@ -323,6 +364,34 @@ export default function AdminDashboardPage() {
               </div>
             ))}
           </div>
+
+          {/* Frame Pagination Controls */}
+          {totalFramePages > 1 && (
+            <div className="flex items-center justify-between p-4 border border-cream-300 rounded-sm bg-cream-50 mt-4">
+              <span className="text-sm text-stone-500">
+                Menampilkan {(framePage - 1) * itemsPerPage + 1} - {Math.min(framePage * itemsPerPage, frames.length)} dari {frames.length} frame
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFramePage(p => Math.max(1, p - 1))}
+                  disabled={framePage === 1}
+                  className="p-1.5 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm font-medium text-charcoal-900 px-2">
+                  Halaman {framePage} dari {totalFramePages}
+                </span>
+                <button
+                  onClick={() => setFramePage(p => Math.min(totalFramePages, p + 1))}
+                  disabled={framePage === totalFramePages}
+                  className="p-1.5 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

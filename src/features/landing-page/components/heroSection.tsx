@@ -15,9 +15,8 @@ export default function HeroSection() {
         </p>
 
         <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-normal text-charcoal-900 leading-[1.08] tracking-tight">
-          Lihat <br />
-          dunia <br />
-          <span className="italic font-light">dengan gayamu.</span>
+          Lihat dunia
+          <span className="italic font-light"> dengan gayamu.</span>
         </h1>
 
         <p className="text-stone-600 max-w-md text-sm sm:text-base leading-relaxed font-light">

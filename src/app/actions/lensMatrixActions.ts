@@ -20,6 +20,7 @@ export async function getMatchingBrandsForWizard(budgetRangeId: string, lensType
       id,
       name,
       description,
+      logo_url,
       brand_lens_types!inner (
         id,
         lens_type_id,
@@ -75,18 +76,26 @@ export async function getBrandMatrixOptions(brandId: string) {
 export async function createLensBrand(
   name: string,
   budgetRangeId: string,
-  description?: string
+  description?: string,
+  logoUrl?: string
 ): Promise<LensBrand> {
   const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('lens_brands')
-    .insert([{ name, budget_range_id: budgetRangeId, description }])
+    .insert([{ name, budget_range_id: budgetRangeId, description, logo_url: logoUrl || null }])
     .select()
     .single();
 
   if (error) throw new Error(error.message);
   revalidatePath('/admin');
   return data as LensBrand;
+}
+
+export async function deleteLensBrand(id: string): Promise<void> {
+  const supabase = await createAdminClient();
+  const { error } = await supabase.from('lens_brands').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
 }
 
 export async function setBrandLensType(
@@ -163,7 +172,8 @@ export async function addBrandLensCoating(
   return data as BrandLensCoating;
 }
 
-// --- DELETE actions (soft-delete via is_available = false) ---
+// --- DELETE actions ---
+
 
 export async function deleteBrandLensType(id: string) {
   const supabase = await createAdminClient();
@@ -219,7 +229,7 @@ export async function updateBrandLensType(id: string, basePrice: number) {
 
 export async function updateBrandLensIndex(
   id: string,
-  payload: { price_adder?: number; description?: string; index_value?: string }
+  payload: { price_adder?: number; description?: string; index_value?: string; color_id?: string | null; coating_id?: string | null }
 ) {
   const supabase = await createAdminClient();
   const { error } = await supabase

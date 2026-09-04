@@ -7,7 +7,7 @@ interface WizardState {
   selectedFrame: Frame | null;
   
   customerProfile: { ageGroup: string; hasBoughtBefore: boolean };
-  prescriptionData: { method: 'EXACT' | 'APPROXIMATE' | 'IN_STORE_EXAM'; sphRight: number; sphLeft: number; cylRight: number; cylLeft: number; pd: number; approximateRange: string };
+  prescriptionData: { method: 'EXACT' | 'APPROXIMATE' | 'IN_STORE_EXAM'; sphRight: number; sphLeft: number; cylRight: number; cylLeft: number; axisRight: number; axisLeft: number; pd: number; addition: number; approximateRange: string };
   selectedBudgetId: string;
   selectedLensTypeId: string;
   selectedBrandId: string;
@@ -37,7 +37,7 @@ export const useWizardStore = create<WizardState>((set) => ({
   selectedFrame: null,
 
   customerProfile: { ageGroup: '18-40', hasBoughtBefore: true },
-  prescriptionData: { method: 'EXACT', sphRight: 0, sphLeft: 0, cylRight: 0, cylLeft: 0, pd: 60, approximateRange: '' },
+  prescriptionData: { method: 'EXACT', sphRight: 0, sphLeft: 0, cylRight: 0, cylLeft: 0, axisRight: 0, axisLeft: 0, pd: 60, addition: 0, approximateRange: '' },
   selectedBudgetId: '',
   selectedLensTypeId: '',
   selectedBrandId: '',
