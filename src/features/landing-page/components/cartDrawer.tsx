@@ -78,7 +78,7 @@ export default function CartDrawer() {
         `Mohon infokan lokasi toko dan link QRIS untuk pembayaran. Terima kasih!`;
 
       // 3. Redirect ke WhatsApp CS
-      const waUrl = `https://wa.me/886955380908?text=${encodeURIComponent(text)}`;
+      const waUrl = `https://wa.me/6285790911416?text=${encodeURIComponent(text)}`;
       clearCart();
       closeCart();
       window.open(waUrl, '_blank');

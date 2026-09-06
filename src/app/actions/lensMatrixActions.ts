@@ -49,9 +49,10 @@ export async function getBrandMatrixOptions(brandId: string) {
       .eq('is_available', true),
     supabase
       .from('brand_lens_indexes')
-      .select('*')
+      .select('*, lens_type:lens_types(id, name), color:brand_lens_colors(id, color_name), coating:brand_lens_coatings(id, coating_name)')
       .eq('brand_id', brandId)
       .eq('is_available', true)
+      .order('lens_level')
       .order('index_value'),
     supabase
       .from('brand_lens_colors')
@@ -71,6 +72,21 @@ export async function getBrandMatrixOptions(brandId: string) {
     colors: (colors.data || []) as BrandLensColor[],
     coatings: (coatings.data || []) as BrandLensCoating[],
   };
+}
+
+export async function getBrandLensSkus(brandId: string, lensTypeId: string): Promise<BrandLensIndex[]> {
+  const supabase = await createAdminClient();
+  const { data, error } = await supabase
+    .from('brand_lens_indexes')
+    .select('*, lens_type:lens_types(id, name), color:brand_lens_colors(id, color_name), coating:brand_lens_coatings(id, coating_name)')
+    .eq('brand_id', brandId)
+    .eq('lens_type_id', lensTypeId)
+    .eq('is_available', true)
+    .order('lens_level')
+    .order('index_value');
+
+  if (error) throw new Error(error.message);
+  return (data || []) as BrandLensIndex[];
 }
 
 export async function createLensBrand(
@@ -127,10 +143,15 @@ export async function setBrandLensType(
 
 export async function addBrandLensIndex(payload: CreateLensIndexPayload): Promise<BrandLensIndex> {
   const supabase = await createAdminClient();
+  const insertPayload = {
+    ...payload,
+    price: payload.price ?? payload.price_adder ?? 0,
+    price_adder: payload.price ?? payload.price_adder ?? 0,
+  };
   const { data, error } = await supabase
     .from('brand_lens_indexes')
-    .insert([payload])
-    .select()
+    .insert([insertPayload])
+    .select('*, lens_type:lens_types(id, name), color:brand_lens_colors(id, color_name), coating:brand_lens_coatings(id, coating_name)')
     .single();
 
   if (error) throw new Error(error.message);
@@ -229,12 +250,20 @@ export async function updateBrandLensType(id: string, basePrice: number) {
 
 export async function updateBrandLensIndex(
   id: string,
-  payload: { price_adder?: number; description?: string; index_value?: string; color_id?: string | null; coating_id?: string | null }
+  payload: Partial<CreateLensIndexPayload>
 ) {
   const supabase = await createAdminClient();
+  const updatePayload: Record<string, unknown> = { ...payload };
+  if (payload.price !== undefined) {
+    updatePayload.price_adder = payload.price;
+    updatePayload.price = payload.price;
+  } else if (payload.price_adder !== undefined) {
+    updatePayload.price = payload.price_adder;
+    updatePayload.price_adder = payload.price_adder;
+  }
   const { error } = await supabase
     .from('brand_lens_indexes')
-    .update(payload)
+    .update(updatePayload)
     .eq('id', id);
   if (error) throw new Error(error.message);
   revalidatePath('/admin');

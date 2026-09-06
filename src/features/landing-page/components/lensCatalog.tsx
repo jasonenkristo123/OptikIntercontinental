@@ -1,114 +1,154 @@
 'use client';
 
-import { useWizardStore } from '@/shared/store/useWizardStore';
-import { Eye, Sun, Shield, Car, Glasses, Layers, ArrowRight } from 'lucide-react';
+import { Eye, Layers, Shield, Sparkles, ArrowRight, CheckCircle2, Sliders, FileText } from 'lucide-react';
 
-const LENS_SOLUTIONS = [
+interface Props {
+  onOpenWizard: () => void;
+  onSwitchToFrames?: () => void;
+}
+
+const LENS_FEATURES = [
   {
-    title: 'Lensa Penglihatan Tunggal',
-    desc: 'Lensa harian untuk rabun jauh, dekat, & silinder.',
     icon: Eye,
-    startingPrice: 'Rp 150.000',
+    title: 'Resep Optik Akurat',
+    desc: 'Mendukung ukuran SPH (minus/plus), CYL (silinder), AXIS, PD, hingga ADD untuk mata presbiopia.',
+    badge: '100% Akurat',
   },
   {
-    title: 'Lensa Progresif',
-    desc: 'Multifokal tanpa garis untuk penglihatan jauh & dekat yang mulus.',
     icon: Layers,
-    startingPrice: 'Rp 450.000',
+    title: 'Indeks Ketipisan Fleksibel',
+    desc: 'Pilihan indeks dari Standard 1.50, Tipis 1.56/1.60, hingga Ultra-Thin 1.67/1.74 untuk estetika maksimal.',
+    badge: 'Standard s/d 1.74',
   },
   {
-    title: 'Lensa Bifokal',
-    desc: 'Lensa pandangan ganda bersegmen klasik Flat Top atau Kryptok.',
-    icon: Glasses,
-    startingPrice: 'Rp 250.000',
-  },
-  {
-    title: 'Anti Radiasi / Blue Protect',
-    desc: 'Memblokir sinar biru berbahaya dari ponsel, tablet, & monitor.',
     icon: Shield,
-    startingPrice: 'Rp 200.000',
+    title: 'Teknologi Coating Modern',
+    desc: 'Perlindungan Blue Cut radiasi gawai, Photocromic adaptif sinar matahari, dan anti-silau berkendara.',
+    badge: 'Multi-Coatings',
   },
   {
-    title: 'Lensa Mengemudi',
-    desc: 'Pelapis anti-silau yang dirancang untuk keselamatan berkendara siang & malam.',
-    icon: Car,
-    startingPrice: 'Rp 350.000',
-  },
-  {
-    title: 'Photocromic / Transitions',
-    desc: 'Lensa adaptif matahari yang otomatis menggelap di luar ruangan.',
-    icon: Sun,
-    startingPrice: 'Rp 300.000',
+    icon: Sparkles,
+    title: 'Pemasangan Presisi Gratis',
+    desc: 'Kirimkan bingkai lama Anda atau bawa langsung ke toko fisik kami untuk pemasangan presisi tanpa biaya tambahan.',
+    badge: 'Free Fitting',
   },
 ];
 
-export default function LensCatalog() {
-  const { openWizard } = useWizardStore();
+const WIZARD_STEPS_PREVIEW = [
+  { step: '01', title: 'Data Resep', desc: 'Input ukuran dokter atau pilih cek gratis di toko' },
+  { step: '02', title: 'Anggaran & Merek', desc: 'Pilihan brand ternama sesuai budget Anda' },
+  { step: '03', title: 'Kustom Indeks & Fitur', desc: 'Pilih ketipisan, warna, dan lapisan lensa' },
+  { step: '04', title: 'Konfirmasi Pesanan', desc: 'Pesanan instan langsung terhubung ke WhatsApp' },
+];
 
+export default function LensCatalog({ onOpenWizard, onSwitchToFrames }: Props) {
   return (
-    <section id="lenses" className="bg-cream-200/40 py-16 border-y border-cream-300">
-      <div className="max-w-7xl mx-auto px-6 space-y-10">
+    <div className="space-y-12 animate-in fade-in duration-300">
+      {/* Intro Header */}
+      <div className="bg-cream-50 border border-cream-300 rounded-sm p-8 sm:p-12 relative overflow-hidden shadow-sm">
+        {/* Subtle decorative accent */}
+        <div className="absolute -right-16 -top-16 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
         
-        {/* Section Title */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Optik Presisi</p>
-            <h2 className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900 mt-1">
-              Solusi Lensa Terpisah
-            </h2>
+        <div className="max-w-3xl space-y-4 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cream-200/80 border border-cream-300 text-charcoal-900 text-xs font-mono">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+            <span>Kustomisasi Lensa Optik Terpisah</span>
           </div>
-          <p className="text-xs text-stone-600 max-w-md font-light">
-            Sudah punya bingkai favorit? Pesan lensa optik presisi tinggi yang disesuaikan langsung dengan resep Anda.
-          </p>
-        </div>
 
-        {/* 6 Solution Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {LENS_SOLUTIONS.map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={idx}
-                className="bg-cream-50 p-6 rounded-sm border border-cream-300 flex flex-col justify-between space-y-4 hover:border-charcoal-900 transition duration-300 group"
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-charcoal-900 leading-tight">
+            Pesan Lensa Saja Sesuai Resep Anda
+          </h2>
+
+          <p className="text-stone-600 text-sm sm:text-base font-light leading-relaxed">
+            Sudah memiliki bingkai kacamata favorit atau ingin memperbarui lensa lama? Di Optik Intercontinental, seluruh lensa dikustomisasi secara presisi sesuai resep mata dan kebutuhan harian Anda tanpa harus membeli bingkai baru.
+          </p>
+
+          {/* Action CTAs */}
+          <div className="pt-4 flex flex-wrap items-center gap-4">
+            <button
+              onClick={onOpenWizard}
+              className="inline-flex items-center gap-2.5 bg-charcoal-900 text-cream-50 px-6 py-3.5 rounded-sm text-xs sm:text-sm font-semibold tracking-wider uppercase hover:bg-stone-800 transition group shadow-md"
+            >
+              <span>Mulai Kustomisasi Lensa</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+
+            {onSwitchToFrames && (
+              <button
+                onClick={onSwitchToFrames}
+                className="inline-flex items-center gap-2 border border-charcoal-900/30 text-charcoal-900 px-5 py-3.5 rounded-sm text-xs sm:text-sm font-medium hover:bg-cream-200/60 transition"
               >
-                <div className="space-y-3">
+                <span>Lihat Katalog Bingkai</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Feature Highlights Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {LENS_FEATURES.map((feat, idx) => {
+          const Icon = feat.icon;
+          return (
+            <div
+              key={idx}
+              className="bg-cream-50 p-6 rounded-sm border border-cream-300 flex flex-col justify-between space-y-4 hover:border-charcoal-900/40 hover:shadow-md transition duration-300 group"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center text-charcoal-900 group-hover:bg-charcoal-900 group-hover:text-cream-50 transition duration-300">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-serif font-bold text-lg text-charcoal-900">{item.title}</h3>
-                  <p className="text-xs text-stone-600 font-light leading-relaxed">{item.desc}</p>
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-cream-200/80 text-stone-600">
+                    {feat.badge}
+                  </span>
                 </div>
-
-                <div className="pt-4 border-t border-cream-200 flex items-center justify-between">
-                  <span className="text-xs font-mono text-stone-500">Mulai dari <strong className="text-charcoal-900">{item.startingPrice}</strong></span>
-                  <button
-                    onClick={() => openWizard(undefined, 4)} // Langsung ke Step 4 Tipe Lensa
-                    className="text-xs font-semibold uppercase tracking-wider text-charcoal-900 flex items-center gap-1 hover:gap-2 transition-all"
-                  >
-                    <span>Pilih</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <h3 className="font-serif font-bold text-base text-charcoal-900">{feat.title}</h3>
+                <p className="text-xs text-stone-600 font-light leading-relaxed">{feat.desc}</p>
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Step by Step Guide & Launch Banner */}
+      <div className="bg-charcoal-900 text-cream-50 rounded-sm p-8 sm:p-10 border border-stone-800 shadow-xl space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-stone-800 pb-6">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-amber-400">Proses Cepat & Terpandu</span>
+            <h3 className="font-serif text-2xl sm:text-3xl font-normal mt-1">4 Langkah Kustomisasi Lensa</h3>
+          </div>
+          <p className="text-xs text-stone-400 max-w-md font-light">
+            Kalkulator kami memandu Anda memilih kombinasi resep, anggaran, dan coating terbaik dalam hitungan menit.
+          </p>
         </div>
 
-        {/* Standalone Banner */}
-        <div className="bg-charcoal-900 text-cream-50 p-8 rounded-sm flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="font-serif text-xl font-normal">Butuh bantuan memilih spesifikasi lensa Anda?</h3>
-            <p className="text-xs text-stone-400 mt-1 font-light">Gunakan kalkulator optik selangkah demi selangkah kami untuk menemukan kecocokan ketebalan, pelapis, dan resep yang tepat.</p>
+        {/* 4 Steps preview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {WIZARD_STEPS_PREVIEW.map((s, idx) => (
+            <div key={idx} className="bg-stone-900/60 p-5 rounded border border-stone-800 space-y-2">
+              <span className="text-amber-400 font-mono text-xs font-bold">{s.step}</span>
+              <h4 className="font-serif text-sm font-semibold text-cream-100">{s.title}</h4>
+              <p className="text-xs text-stone-400 font-light leading-relaxed">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom CTA trigger */}
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-stone-950/40 p-6 rounded border border-stone-800">
+          <div className="flex items-center gap-3 text-xs text-stone-300">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span>Resep dapat diverifikasi manual oleh optisi kami sebelum proses pengerjaan.</span>
           </div>
+
           <button
-            onClick={() => openWizard(undefined, 1)}
-            className="shrink-0 bg-cream-50 text-charcoal-900 px-6 py-3 rounded-sm text-xs font-semibold uppercase tracking-wider hover:bg-cream-200 transition"
+            onClick={onOpenWizard}
+            className="w-full sm:w-auto shrink-0 bg-cream-50 text-charcoal-900 px-6 py-3 rounded-sm text-xs font-semibold uppercase tracking-wider hover:bg-cream-200 transition text-center"
           >
             Buka Kalkulator Lensa
           </button>
         </div>
-
       </div>
-    </section>
+    </div>
   );
-}   
+}

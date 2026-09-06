@@ -68,26 +68,47 @@ export interface BrandLensType {
 export interface BrandLensIndex {
   id: string;
   brand_id: string;
+  lens_type_id?: string | null;
+  lens_level?: string;
   index_value: string;
-  price_adder: number;
+  price: number;
+  price_adder?: number; // backwards compatibility
   color_id?: string | null;
   coating_id?: string | null;
   rec_sph_min?: number;
   rec_sph_max?: number;
   rec_cyl_max?: number;
+  min_sph?: number;
+  max_sph?: number;
+  max_cyl?: number;
+  min_add?: number;
+  max_add?: number;
+  max_s_c?: number;
   description?: string;
   is_available: boolean;
+  lens_type?: LensType;
+  color?: BrandLensColor;
+  coating?: BrandLensCoating;
 }
 
 export interface CreateLensIndexPayload {
   brand_id: string;
+  lens_type_id?: string | null;
+  lens_level?: string;
   index_value: string;
-  price_adder: number;
+  price: number;
+  price_adder?: number;
   color_id?: string | null;
   coating_id?: string | null;
   rec_sph_min?: number;
   rec_sph_max?: number;
   rec_cyl_max?: number;
+  min_sph?: number;
+  max_sph?: number;
+  max_cyl?: number;
+  min_add?: number;
+  max_add?: number;
+  max_s_c?: number;
   description?: string;
 }
 
@@ -131,6 +152,7 @@ export interface LensSelectionDetails {
   brandName: string;
   lensTypeId: string;
   lensTypeName: string;
+  lensLevel?: string;
   indexId?: string;
   indexValue?: string;
   colorId?: string;

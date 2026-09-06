@@ -23,6 +23,8 @@ interface WizardState {
   selectedCoatingName: string;
   selectedCoatingPrice: number;
   basePrice: number;
+  selectedLevel: string;
+  selectedLensPrice: number;
 
   openWizard: (frame?: Frame, initialStep?: number) => void;
   closeWizard: () => void;
@@ -53,6 +55,8 @@ export const useWizardStore = create<WizardState>((set) => ({
   selectedCoatingName: '',
   selectedCoatingPrice: 0,
   basePrice: 0,
+  selectedLevel: '',
+  selectedLensPrice: 0,
 
   openWizard: (frame, initialStep = 1) =>
     set({
@@ -64,5 +68,26 @@ export const useWizardStore = create<WizardState>((set) => ({
   closeWizard: () => set({ isOpen: false }),
   setStep: (step) => set({ currentStep: step }),
   updateState: (data) => set((state) => ({ ...state, ...data })),
-  resetWizard: () => set({ currentStep: 1, selectedFrame: null }),
+  resetWizard: () =>
+    set({
+      currentStep: 1,
+      selectedFrame: null,
+      selectedBudgetId: '',
+      selectedLensTypeId: '',
+      selectedBrandId: '',
+      selectedBrandName: '',
+      selectedLensTypeName: '',
+      selectedIndexId: '',
+      selectedIndexValue: '',
+      selectedIndexPrice: 0,
+      selectedColorId: '',
+      selectedColorName: '',
+      selectedColorPrice: 0,
+      selectedCoatingId: '',
+      selectedCoatingName: '',
+      selectedCoatingPrice: 0,
+      basePrice: 0,
+      selectedLevel: '',
+      selectedLensPrice: 0,
+    }),
 }));

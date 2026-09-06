@@ -25,7 +25,7 @@ export default function FloatingWhatsAppButton() {
 
   const handleClick = () => {
     const text = 'Halo, saya ingin bertanya tentang produk Anda.';
-    const waUrl = `https://wa.me/886955380908?text=${encodeURIComponent(text)}`;
+    const waUrl = `https://wa.me/6285790911416?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
   };
 
