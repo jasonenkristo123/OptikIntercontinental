@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Frame } from '@/shared/types/database';
 import { useCartStore } from '@/shared/store/useCartStore';
 import { useWizardStore } from '@/shared/store/useWizardStore';
@@ -50,6 +50,12 @@ export default function FrameCatalog({ frames }: Props) {
   
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 9;
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const filteredFrames = useMemo(() => {
     return frames.filter((frame) => {
@@ -186,7 +192,7 @@ export default function FrameCatalog({ frames }: Props) {
           </div>
 
           {/* Frame Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div ref={gridRef} className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8 scroll-mt-24">
             {filteredFrames.length === 0 ? (
               <div className="col-span-full text-center py-16 text-stone-500 font-light text-sm">
                 Tidak ada bingkai yang cocok dengan kriteria pilihan Anda.
@@ -198,11 +204,12 @@ export default function FrameCatalog({ frames }: Props) {
                   className="bg-cream-50 border border-cream-300/80 rounded-sm overflow-hidden flex flex-col justify-between group hover:border-charcoal-900/40 transition duration-300 shadow-sm"
                 >
                   {/* Image Box */}
-                  <div className="relative aspect-[4/3] bg-cream-200/50 overflow-hidden">
+                  <div className="relative aspect-square sm:aspect-[4/3] bg-white overflow-hidden">
                     <Image
                       src={frame.image_url}
                       alt={frame.name}
                       fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
                       className="object-cover group-hover:scale-105 transition duration-500"
                     />
 
@@ -229,26 +236,28 @@ export default function FrameCatalog({ frames }: Props) {
                     )}
 
                     {/* Bottom-Left Material Badge */}
-                    <div className="absolute bottom-3 left-3 text-charcoal-900 text-xs md:text-lg font-bold uppercase px-2 py-0.5 ">
-                      {frame.material?.name}
-                    </div>
+                    {frame.material?.name && (
+                      <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-charcoal-900/85 backdrop-blur-sm text-cream-50 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.15em] px-2 py-1 rounded-sm">
+                        {frame.material.name}
+                      </div>
+                    )}
                   </div>
 
                   {/* Card Body */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between space-y-3 sm:space-y-4">
                     <div>
-                      <div className="flex items-center justify-between text-xs text-stone-500 font-mono mb-1">
-                        <span>{frame.brand?.name ? `${frame.brand.name} • ${frame.category?.name}` : `Kategori: ${frame.category?.name}`}</span>
-                        <span className="text-amber-700 font-semibold">Tersisa {frame.stock}</span>
+                      <div className="flex items-center justify-between gap-1 text-[10px] sm:text-xs text-stone-500 font-mono mb-1">
+                        <span className="truncate">{frame.brand?.name ? `${frame.brand.name} • ${frame.category?.name}` : `Kategori: ${frame.category?.name}`}</span>
+                        <span className="text-amber-700 font-semibold shrink-0">Tersisa {frame.stock}</span>
                       </div>
-                      <h3 className="font-serif text-lg font-bold text-charcoal-900">{frame.name}</h3>
-                      <p className="font-serif font-bold text-charcoal-900 text-base mt-2">
+                      <h3 className="font-serif text-sm sm:text-lg font-bold text-charcoal-900">{frame.name}</h3>
+                      <p className="font-serif font-bold text-charcoal-900 text-sm sm:text-base mt-1 sm:mt-2">
                         Rp {Number(frame.price).toLocaleString('id-ID')}
                       </p>
                     </div>
 
                     {/* 2 CTA Buttons */}
-                    <div className="grid grid-cols-2 gap-2 text-xs pt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2">
                       <button
                         onClick={() => handleBuyFrameOnly(frame)}
                         className="border border-charcoal-900 text-charcoal-900 hover:bg-charcoal-900 hover:text-cream-50 font-medium py-2.5 rounded-sm transition text-center"
@@ -272,7 +281,7 @@ export default function FrameCatalog({ frames }: Props) {
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-4 mt-12">
               <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => goToPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className="p-2 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
@@ -284,7 +293,7 @@ export default function FrameCatalog({ frames }: Props) {
               </span>
               
               <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-sm border border-cream-300 text-stone-500 hover:bg-cream-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
