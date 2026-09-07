@@ -94,13 +94,22 @@ export default function CartDrawer() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-charcoal-900/40 backdrop-blur-sm flex justify-end">
-      <div className="w-full max-w-md bg-cream-100 h-full flex flex-col shadow-2xl text-charcoal-900">
+    <div
+      className="fixed inset-0 z-50 overflow-hidden bg-charcoal-900/40 backdrop-blur-sm flex justify-end"
+      role="presentation"
+      onClick={(e) => { if (e.target === e.currentTarget) closeCart(); }}
+    >
+      <aside
+        className="w-full max-w-md bg-cream-100 h-full flex flex-col shadow-2xl text-charcoal-900"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-drawer-title"
+      >
         
         {/* Header Drawer */}
         <div className="p-6 border-b border-cream-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="font-serif text-lg font-bold">Pilihan Anda</h2>
+            <h2 id="cart-drawer-title" className="font-serif text-lg font-bold">Pilihan Anda</h2>
             <span className="text-xs font-mono text-stone-500">({items.length})</span>
           </div>
           <button onClick={closeCart} className="p-2 text-stone-500 hover:text-charcoal-900">
@@ -130,7 +139,7 @@ export default function CartDrawer() {
               <div key={item.id} className="bg-white p-4 rounded-sm border border-cream-300 flex gap-4 text-xs">
                 {item.frameImage && (
                   <div className="relative w-16 h-16 shrink-0">
-                    <Image src={item.frameImage} alt="" fill className="object-cover bg-cream-100 rounded-sm" />
+                    <Image src={item.frameImage} alt={`Foto ${item.frameName || 'produk'}`} fill className="object-cover bg-cream-100 rounded-sm" />
                   </div>
                 )}
                 <div className="flex-1 space-y-1">
@@ -184,7 +193,7 @@ export default function CartDrawer() {
           </div>
         )}
 
-      </div>
+      </aside>
     </div>
   );
 }

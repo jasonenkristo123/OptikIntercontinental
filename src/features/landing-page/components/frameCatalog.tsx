@@ -84,17 +84,15 @@ export default function FrameCatalog({ frames }: Props) {
   };
 
   return (
-    <section id="frames" className="max-w-7xl mx-auto px-6 py-16 space-y-10">      
-      {/* Top Section Header & Tab Controls */}
+    <section id="frames" className="max-w-7xl mx-auto px-6 py-16 space-y-10" aria-labelledby="catalog-heading">      
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-cream-300 pb-6">
         <div>
           <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Katalog Produk</p>
-          <h2 className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900 mt-1">
+          <h2 id="catalog-heading" className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900 mt-1">
             {activeTab === 'frames' ? 'Bingkai Pilihan' : 'Kustomisasi Lensa'}
           </h2>
         </div>
 
-        {/* Tab Buttons */}
         <div className="inline-flex p-1.5 bg-cream-200/90 rounded-xl border border-cream-300 shadow-inner self-start md:self-auto">
           <button
             type="button"
@@ -105,7 +103,7 @@ export default function FrameCatalog({ frames }: Props) {
                 : 'text-stone-600 hover:text-charcoal-900 hover:bg-cream-100/70'
             }`}
           >
-            <Glasses className="w-4 h-4" />
+            <Glasses className="w-4 h-4" aria-hidden="true" />
             <span>Koleksi Bingkai</span>
           </button>
 
@@ -118,7 +116,7 @@ export default function FrameCatalog({ frames }: Props) {
                 : 'text-stone-600 hover:text-charcoal-900 hover:bg-cream-100/70'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <Sparkles className="w-4 h-4 text-amber-500" aria-hidden="true" />
             <span>Beli Lensa Saja</span>
           </button>
         </div>
@@ -211,20 +209,20 @@ export default function FrameCatalog({ frames }: Props) {
                     {/* Top-Right Authenticity Badge / Logo */}
                     {frame.authenticity?.name?.toLowerCase().includes('original') && (
                       <div className="absolute top-3 right-3">
-                        {frame.authenticity.has_logo && frame.authenticity.logo_url ? (
-                          <div className="bg-white/90 p-1.5 rounded shadow-sm backdrop-blur-sm border border-cream-200">
+                        {frame.brand?.logo_url ? (
+                          <div className="bg-white/95 px-2 py-1 rounded shadow-sm backdrop-blur-sm border border-cream-200 flex items-center justify-center">
                             <Image
-                              src={frame.authenticity.logo_url}
-                              alt={frame.authenticity.name}
-                              width={40}
-                              height={16}
+                              src={frame.brand.logo_url}
+                              alt={frame.brand.name}
+                              width={48}
+                              height={18}
                               className="object-contain h-4 w-auto"
                             />
                           </div>
                         ) : (
-                          <div className="bg-charcoal-900/90 text-cream-50 text-[10px] font-mono tracking-wider px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                          <div className="bg-charcoal-900/90 text-cream-50 text-[10px] font-mono tracking-wider px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1 shadow-sm">
                             <Sparkles className="w-3 h-3 text-amber-300" />
-                            <span>{frame.authenticity.name}</span>
+                            <span>{frame.brand?.name || frame.authenticity.name}</span>
                           </div>
                         )}
                       </div>
@@ -240,7 +238,7 @@ export default function FrameCatalog({ frames }: Props) {
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div>
                       <div className="flex items-center justify-between text-xs text-stone-500 font-mono mb-1">
-                        <span>Kategori: {frame.category?.name}</span>
+                        <span>{frame.brand?.name ? `${frame.brand.name} • ${frame.category?.name}` : `Kategori: ${frame.category?.name}`}</span>
                         <span className="text-amber-700 font-semibold">Tersisa {frame.stock}</span>
                       </div>
                       <h3 className="font-serif text-lg font-bold text-charcoal-900">{frame.name}</h3>

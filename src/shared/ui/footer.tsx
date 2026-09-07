@@ -13,7 +13,7 @@ export default function Footer() {
           {/* Brand & Location */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-2xl font-bold text-cream-50 tracking-tight">Optik Intercontinental</h3>
+              <h2 className="text-2xl font-bold text-cream-50 tracking-tight">Optik Intercontinental</h2>
               <div className="h-1 w-12 bg-cream-200 mt-2 rounded-full" />
             </div>
             <p className="text-cream-300 text-sm leading-relaxed">
@@ -33,7 +33,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-cream-50">Tautan Cepat</h4>
+            <h3 className="text-lg font-semibold mb-6 text-cream-50">Tautan Cepat</h3>
             <ul className="space-y-3">
               {[
                 { name: "Beranda", href: "/" },
@@ -56,7 +56,7 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-cream-50">Hubungi Kami</h4>
+            <h3 className="text-lg font-semibold mb-6 text-cream-50">Hubungi Kami</h3>
             <ul className="space-y-4">
               <li>
                 <a 
@@ -98,7 +98,7 @@ export default function Footer() {
 
           {/* Social Media & Maps */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-cream-50">Terhubung & Kunjungi Kami</h4>
+            <h3 className="text-lg font-semibold mb-6 text-cream-50">Terhubung & Kunjungi Kami</h3>
             <p className="text-cream-300 text-sm mb-6 leading-relaxed">
               Ikuti media sosial kami untuk koleksi terbaru dan tips perawatan mata.
             </p>

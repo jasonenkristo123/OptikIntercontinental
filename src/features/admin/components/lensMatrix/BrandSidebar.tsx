@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Plus, Trash2 } from 'lucide-react';
+import { Check, Plus, Trash2, Upload, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import type { LensBrand, MasterItem } from '@/shared/types/database';
+import { uploadAndCompressImage } from '@/lib/uploadImage';
 
 // ---------------------------------------------------------------------------
 // AddBrandForm
@@ -33,6 +35,25 @@ export function AddBrandForm({
   onLogoUrlChange,
   onSubmit,
 }: AddBrandFormProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [fileName, setFileName] = useState('');
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    setFileName(file.name);
+    try {
+      const url = await uploadAndCompressImage(file, 'lens-brands');
+      onLogoUrlChange(url);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal mengunggah logo merek lensa');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <form
       onSubmit={onSubmit}
@@ -83,36 +104,62 @@ export function AddBrandForm({
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-stone-500 mb-1">URL Logo Merek (Opsional)</label>
-        <input
-          type="text"
-          placeholder="https://example.com/logo.png"
-          value={brandLogoUrl}
-          onChange={(e) => onLogoUrlChange(e.target.value)}
-          className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
-        />
+        <label className="block text-xs font-semibold text-stone-500 mb-1">
+          Logo Merek (Upload File)
+        </label>
+        
+        <div className="flex items-center gap-3">
+          {brandLogoUrl && (
+            <div className="relative w-12 h-10 shrink-0 bg-white border border-cream-300 rounded-sm p-1 flex items-center justify-center">
+              <Image src={brandLogoUrl} alt="Preview logo merek" fill className="object-contain" unoptimized />
+            </div>
+          )}
+
+          <label className="flex-1 flex items-center justify-center gap-2 border border-dashed border-cream-400 hover:border-charcoal-900 rounded-sm py-2 px-3 cursor-pointer text-stone-500 hover:text-charcoal-900 text-xs transition bg-cream-100">
+            {isUploading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-charcoal-900" />
+            ) : (
+              <Upload className="w-4 h-4" />
+            )}
+            <span className="truncate">
+              {isUploading ? 'Mengompres...' : fileName ? fileName : 'Pilih Logo (JPG/PNG)'}
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              disabled={isUploading}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </label>
+        </div>
+
         {brandLogoUrl && (
-          <div className="mt-2 p-2 bg-white border border-cream-200 rounded-sm inline-flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={brandLogoUrl} alt="Preview" className="h-8 w-auto object-contain" />
-            <span className="text-[10px] text-stone-400">Preview</span>
+          <div className="mt-1 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                onLogoUrlChange('');
+                setFileName('');
+              }}
+              className="text-[11px] text-rose-600 hover:underline"
+            >
+              Hapus Logo
+            </button>
           </div>
         )}
       </div>
 
       <button
         type="submit"
-        className="w-full bg-charcoal-900 hover:bg-stone-800 text-cream-50 font-semibold py-2.5 rounded-sm transition"
+        disabled={isUploading}
+        className="w-full bg-charcoal-900 hover:bg-stone-800 disabled:opacity-50 text-cream-50 font-semibold py-2.5 rounded-sm transition text-xs flex items-center justify-center gap-2"
       >
-        Simpan Merek
+        <span>Simpan Merek</span>
       </button>
     </form>
   );
 }
-
-// ---------------------------------------------------------------------------
-// BrandSelectorItem — handles its own confirm-delete state
-// ---------------------------------------------------------------------------
 
 type BrandSelectorItemProps = {
   brand: LensBrand;
@@ -159,9 +206,16 @@ function BrandSelectorItem({
       onKeyDown={(e) => e.key === 'Enter' && onSelect(brand.id)}
     >
       {/* Brand info */}
-      <div className="flex-1 min-w-0">
-        <div className="truncate">{brand.name}</div>
-        <div className="text-[11px] text-stone-400 font-normal">{brand.budget_range?.name}</div>
+      <div className="flex-1 min-w-0 flex items-center gap-2.5">
+        {brand.logo_url && (
+          <div className="relative w-8 h-7 shrink-0 bg-white border border-cream-200 rounded p-0.5 flex items-center justify-center">
+            <Image src={brand.logo_url} alt={brand.name} fill className="object-contain" unoptimized />
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="truncate">{brand.name}</div>
+          <div className="text-[11px] text-stone-400 font-normal">{brand.budget_range?.name}</div>
+        </div>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">

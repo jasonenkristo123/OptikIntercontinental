@@ -135,4 +135,19 @@
   html {
     @apply font-sans;
   }
+
+  /* ─── Interactive elements: always pointer cursor ─────────────────────── */
+  button,
+  [role="button"],
+  select,
+  summary,
+  label[for],
+  [tabindex]:not([tabindex="-1"]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
 }

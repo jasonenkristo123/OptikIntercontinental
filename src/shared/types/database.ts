@@ -18,6 +18,10 @@ export interface BudgetRange extends MasterItem {
   description?: string;
 }
 
+export interface FrameBrand extends MasterItem {
+  logo_url?: string;
+}
+
 // --- FRAME TYPES ---
 export interface Frame {
   id: string;
@@ -25,6 +29,7 @@ export interface Frame {
   category_id: string;
   material_id: string;
   authenticity_id: string;
+  brand_id?: string | null;
   price: number;
   stock: number;
   image_url: string;
@@ -32,6 +37,7 @@ export interface Frame {
   category?: MasterItem;
   material?: MasterItem;
   authenticity?: AuthenticityTag;
+  brand?: FrameBrand;
 }
 
 export interface CreateFramePayload {
@@ -39,6 +45,7 @@ export interface CreateFramePayload {
   category_id: string;
   material_id: string;
   authenticity_id: string;
+  brand_id?: string | null;
   price: number;
   stock: number;
   image_url: string;

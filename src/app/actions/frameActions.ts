@@ -12,7 +12,8 @@ export async function getFrames(): Promise<Frame[]> {
       *,
       category:frame_categories(id, name),
       material:frame_materials(id, name),
-      authenticity:authenticity_tags(id, name, has_logo, logo_url)
+      authenticity:authenticity_tags(id, name, has_logo, logo_url),
+      brand:frame_brands(id, name, logo_url)
     `)
     .order('created_at', { ascending: false });
 
