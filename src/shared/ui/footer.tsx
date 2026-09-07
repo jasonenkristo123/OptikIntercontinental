@@ -24,9 +24,7 @@ export default function Footer() {
                 <MapPin className="w-4 h-4 text-cream-200 group-hover:text-charcoal-900 transition-colors" />
               </div>
               <p className="text-sm text-cream-300 leading-relaxed mt-1 group-hover:text-cream-100 transition-colors">
-                Jl. Example Road No. 123<br />
-                City, State 12345<br />
-                Indonesia
+                Jl. S.W Pranoto No.2F, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65118<br />
               </p>
             </div>
           </div>
@@ -68,7 +66,7 @@ export default function Footer() {
                   <div className="bg-charcoal-800 p-2.5 rounded-lg group-hover:bg-[#25D366] transition-colors duration-300 shadow-sm">
                     <MessageCircle className="w-4 h-4 text-cream-200 group-hover:text-white" />
                   </div>
-                  <span className="text-sm">+62 812-3456-7890 (WA)</span>
+                  <span className="text-sm">+62 857-9091-1416 (WA)</span>
                 </a>
               </li>
               <li>
@@ -79,7 +77,7 @@ export default function Footer() {
                   <div className="bg-charcoal-800 p-2.5 rounded-lg group-hover:bg-blue-500 transition-colors duration-300 shadow-sm">
                     <Phone className="w-4 h-4 text-cream-200 group-hover:text-white" />
                   </div>
-                  <span className="text-sm">+62 812-3456-7890</span>
+                  <span className="text-sm">+62 857-9091-1416</span>
                 </a>
               </li>
               <li>
@@ -129,15 +127,15 @@ export default function Footer() {
             
             <div className="p-4 bg-charcoal-800/50 rounded-xl border border-charcoal-800 hover:border-cream-300/30 transition-colors">
               <h4 className="text-xs font-semibold mb-3 text-cream-200 uppercase tracking-wider">Lokasi Toko</h4>
-              <a 
-                href="https://maps.google.com" 
+              <Link 
+                href="https://www.google.com/maps/place/Optik+Intercontinental/@-7.984718,112.6282561,17z/data=!3m1!4b1!4m6!3m5!1s0x2dd62819d0c39f93:0x1c6ec398f51335af!8m2!3d-7.984718!4d112.630831!16s%2Fg%2F11b6bqf78l?entry=ttu&g_ep=EgoyMDI2MDkwMi4wIKXMDSoASAFQAw%3D%3D" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="inline-flex items-center justify-center w-full gap-2 px-4 py-2 bg-cream-100 text-charcoal-900 rounded-lg text-sm font-medium hover:bg-white transition-colors hover:shadow-md active:scale-95"
               >
                 <MapPin className="w-4 h-4" />
                 Buka di Google Maps
-              </a>
+              </Link>
             </div>
           </div>
         </div>
