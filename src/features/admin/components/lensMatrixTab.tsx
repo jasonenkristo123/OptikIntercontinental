@@ -67,8 +67,16 @@ export default function LensMatrixTab({ masterData }: Props) {
   const [selectedLensType, setSelectedLensType] = useState('');
   const [basePrice, setBasePrice] = useState<number | string>('');
 
-  const [indexValue, setIndexValue] = useState('1.56');
-  const [indexAdder, setIndexAdder] = useState<number | string>('');
+  const [indexLensType, setIndexLensType] = useState('');
+  const [indexLevel, setIndexLevel] = useState('Standard');
+  const [indexValue, setIndexValue] = useState('1.50');
+  const [indexPrice, setIndexPrice] = useState<number | string>('');
+  const [indexMinSph, setIndexMinSph] = useState<number | string>(-8.00);
+  const [indexMaxSph, setIndexMaxSph] = useState<number | string>(5.50);
+  const [indexMaxCyl, setIndexMaxCyl] = useState<number | string>(-4.00);
+  const [indexMinAdd, setIndexMinAdd] = useState<number | string>(0.75);
+  const [indexMaxAdd, setIndexMaxAdd] = useState<number | string>(3.50);
+  const [indexMaxSc, setIndexMaxSc] = useState<number | string>(-8.00);
   const [indexDesc, setIndexDesc] = useState('');
   const [indexColorId, setIndexColorId] = useState('');
   const [indexCoatingId, setIndexCoatingId] = useState('');
@@ -144,14 +152,23 @@ export default function LensMatrixTab({ masterData }: Props) {
     if (!selectedBrandId || !indexValue) return;
     await addBrandLensIndex({
       brand_id: selectedBrandId,
+      lens_type_id: indexLensType || null,
+      lens_level: indexLevel.trim() || 'Standard',
       index_value: indexValue,
-      price_adder: Number(indexAdder),
+      price: Number(indexPrice) || 0,
+      price_adder: Number(indexPrice) || 0,
+      min_sph: Number(indexMinSph) || -8.0,
+      max_sph: Number(indexMaxSph) || 5.5,
+      max_cyl: Number(indexMaxCyl) || -4.0,
+      min_add: Number(indexMinAdd) || 0.75,
+      max_add: Number(indexMaxAdd) || 3.5,
+      max_s_c: Number(indexMaxSc) || -8.0,
       description: indexDesc,
       color_id: indexColorId || null,
       coating_id: indexCoatingId || null,
     });
-    setIndexValue('1.56');
-    setIndexAdder('');
+    setIndexValue('1.50');
+    setIndexPrice('');
     setIndexDesc('');
     setIndexColorId('');
     setIndexCoatingId('');
@@ -214,7 +231,22 @@ export default function LensMatrixTab({ masterData }: Props) {
 
   const handleUpdateIndex = async (
     id: string,
-    payload: { index_value?: string; price_adder?: number; description?: string }
+    payload: {
+      index_value?: string;
+      price?: number;
+      price_adder?: number;
+      description?: string;
+      color_id?: string | null;
+      coating_id?: string | null;
+      lens_type_id?: string | null;
+      lens_level?: string;
+      min_sph?: number;
+      max_sph?: number;
+      max_cyl?: number;
+      min_add?: number;
+      max_add?: number;
+      max_s_c?: number;
+    }
   ) => {
     await updateBrandLensIndex(id, payload);
     setEditingId(null);
@@ -291,17 +323,34 @@ export default function LensMatrixTab({ masterData }: Props) {
 
             <IndexSection
               indexes={brandOptions.indexes}
+              lensTypes={masterData.lensTypes}
               colors={brandOptions.colors}
               coatings={brandOptions.coatings}
+              selectedLensType={indexLensType}
+              lensLevel={indexLevel}
               indexValue={indexValue}
-              indexAdder={indexAdder}
+              indexPrice={indexPrice}
+              minSph={indexMinSph}
+              maxSph={indexMaxSph}
+              maxCyl={indexMaxCyl}
+              minAdd={indexMinAdd}
+              maxAdd={indexMaxAdd}
+              maxSc={indexMaxSc}
               indexDesc={indexDesc}
               indexColorId={indexColorId}
               indexCoatingId={indexCoatingId}
               editingId={editingId}
               deletingId={deletingId}
+              onSelectedLensTypeChange={setIndexLensType}
+              onLensLevelChange={setIndexLevel}
               onIndexValueChange={setIndexValue}
-              onIndexAdderChange={setIndexAdder}
+              onIndexPriceChange={setIndexPrice}
+              onMinSphChange={setIndexMinSph}
+              onMaxSphChange={setIndexMaxSph}
+              onMaxCylChange={setIndexMaxCyl}
+              onMinAddChange={setIndexMinAdd}
+              onMaxAddChange={setIndexMaxAdd}
+              onMaxScChange={setIndexMaxSc}
               onIndexDescChange={setIndexDesc}
               onIndexColorIdChange={setIndexColorId}
               onIndexCoatingIdChange={setIndexCoatingId}

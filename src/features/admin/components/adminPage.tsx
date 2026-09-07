@@ -20,7 +20,8 @@ import {
   Frame,
   MasterItem,
   AuthenticityTag,
-  LensType
+  LensType,
+  FrameBrand
 } from '@/shared/types/database';
 
 import FrameFormModal from './frameFormModal';
@@ -71,7 +72,8 @@ export default function AdminDashboardPage() {
     authenticity: AuthenticityTag[];
     lensTypes: LensType[];
     budgets: MasterItem[];
-  }>({ categories: [], materials: [], authenticity: [], lensTypes: [], budgets: [] });
+    frameBrands: FrameBrand[];
+  }>({ categories: [], materials: [], authenticity: [], lensTypes: [], budgets: [], frameBrands: [] });
 
   // Load All Data
   const loadData = () => {
@@ -334,6 +336,7 @@ export default function AdminDashboardPage() {
                 <div className="flex-1 min-w-0">
                   <h3 className="font-serif font-normal text-charcoal-900 truncate text-sm">{frame.name}</h3>
                   <p className="text-xs text-charcoal-900 mt-0.5">
+                    {frame.brand?.name && <span className="font-semibold text-stone-800">{frame.brand.name} • </span>}
                     {frame.category?.name} • {frame.material?.name}
                   </p>
                   <p className="text-xs text-stone-500 mt-1">Stok: <strong className="text-stone-700">{frame.stock} pcs</strong></p>
@@ -417,6 +420,7 @@ export default function AdminDashboardPage() {
         categories={masterData.categories}
         materials={masterData.materials}
         authenticity={masterData.authenticity}
+        brands={masterData.frameBrands}
       />
     </div>
   );

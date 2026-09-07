@@ -18,6 +18,10 @@ export interface BudgetRange extends MasterItem {
   description?: string;
 }
 
+export interface FrameBrand extends MasterItem {
+  logo_url?: string;
+}
+
 // --- FRAME TYPES ---
 export interface Frame {
   id: string;
@@ -25,6 +29,7 @@ export interface Frame {
   category_id: string;
   material_id: string;
   authenticity_id: string;
+  brand_id?: string | null;
   price: number;
   stock: number;
   image_url: string;
@@ -32,6 +37,7 @@ export interface Frame {
   category?: MasterItem;
   material?: MasterItem;
   authenticity?: AuthenticityTag;
+  brand?: FrameBrand;
 }
 
 export interface CreateFramePayload {
@@ -39,6 +45,7 @@ export interface CreateFramePayload {
   category_id: string;
   material_id: string;
   authenticity_id: string;
+  brand_id?: string | null;
   price: number;
   stock: number;
   image_url: string;
@@ -68,26 +75,47 @@ export interface BrandLensType {
 export interface BrandLensIndex {
   id: string;
   brand_id: string;
+  lens_type_id?: string | null;
+  lens_level?: string;
   index_value: string;
-  price_adder: number;
+  price: number;
+  price_adder?: number; // backwards compatibility
   color_id?: string | null;
   coating_id?: string | null;
   rec_sph_min?: number;
   rec_sph_max?: number;
   rec_cyl_max?: number;
+  min_sph?: number;
+  max_sph?: number;
+  max_cyl?: number;
+  min_add?: number;
+  max_add?: number;
+  max_s_c?: number;
   description?: string;
   is_available: boolean;
+  lens_type?: LensType;
+  color?: BrandLensColor;
+  coating?: BrandLensCoating;
 }
 
 export interface CreateLensIndexPayload {
   brand_id: string;
+  lens_type_id?: string | null;
+  lens_level?: string;
   index_value: string;
-  price_adder: number;
+  price: number;
+  price_adder?: number;
   color_id?: string | null;
   coating_id?: string | null;
   rec_sph_min?: number;
   rec_sph_max?: number;
   rec_cyl_max?: number;
+  min_sph?: number;
+  max_sph?: number;
+  max_cyl?: number;
+  min_add?: number;
+  max_add?: number;
+  max_s_c?: number;
   description?: string;
 }
 
@@ -131,6 +159,7 @@ export interface LensSelectionDetails {
   brandName: string;
   lensTypeId: string;
   lensTypeName: string;
+  lensLevel?: string;
   indexId?: string;
   indexValue?: string;
   colorId?: string;

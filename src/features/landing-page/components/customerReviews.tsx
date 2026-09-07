@@ -25,32 +25,46 @@ const REVIEWS = [
 
 export default function CustomerReviews() {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16 space-y-10">
+    <section
+      className="max-w-7xl mx-auto px-6 py-16 space-y-10"
+      aria-labelledby="reviews-heading"
+      itemScope
+      itemType="https://schema.org/ItemList"
+    >
       <div className="text-center space-y-2">
         <p className="text-xs font-mono uppercase tracking-widest text-stone-500">Testimoni</p>
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900">
+        <h2 id="reviews-heading" className="font-serif text-3xl sm:text-4xl font-normal text-charcoal-900">
           Dipercaya oleh Pengguna Kacamata
         </h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {REVIEWS.map((rev, idx) => (
-          <div key={idx} className="bg-cream-50 border border-cream-300 p-6 rounded-sm space-y-4 shadow-sm">
-            <div className="flex text-amber-500 gap-1">
+          <article
+            key={idx}
+            className="bg-cream-50 border border-cream-300 p-6 rounded-sm space-y-4 shadow-sm"
+            itemScope
+            itemType="https://schema.org/Review"
+            itemProp="itemListElement"
+          >
+            <div className="flex text-amber-500 gap-1" aria-label={`Rating: ${rev.rating} dari 5 bintang`}>
               {[...Array(rev.rating)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
+                <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" aria-hidden="true" />
               ))}
+              <meta itemProp="reviewRating" content={String(rev.rating)} />
             </div>
-            <p className="text-xs text-stone-700 font-light leading-relaxed italic">
+            <blockquote className="text-xs text-stone-700 font-light leading-relaxed italic" itemProp="reviewBody">
               "{rev.comment}"
-            </p>
-            <div className="pt-2 border-t border-cream-200 flex items-center justify-between text-xs">
-              <span className="font-serif font-bold text-charcoal-900">{rev.name}</span>
-              <span className="text-[11px] text-emerald-700 flex items-center gap-1 font-mono">
-                <CheckCircle className="w-3.5 h-3.5" /> {rev.role}
+            </blockquote>
+            <footer className="pt-2 border-t border-cream-200 flex items-center justify-between text-xs">
+              <span className="font-serif font-bold text-charcoal-900" itemProp="author" itemScope itemType="https://schema.org/Person">
+                <span itemProp="name">{rev.name}</span>
               </span>
-            </div>
-          </div>
+              <span className="text-[11px] text-emerald-700 flex items-center gap-1 font-mono">
+                <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" /> {rev.role}
+              </span>
+            </footer>
+          </article>
         ))}
       </div>
     </section>

@@ -2,7 +2,6 @@
 
 import HeroSection from '../components/heroSection';
 import FrameCatalog from '../components/frameCatalog';
-import LensCatalog from '../components/lensCatalog';
 import CustomerReviews from '../components/customerReviews';
 import LensWizardModal from '../components/lensWizardModal';
 import FloatingWhatsAppButton from '../components/floatingWhatsAppButton';
@@ -18,7 +17,6 @@ export default function HomeContainer({ frames }: Props) {
     <HomeLayout>
       <HeroSection />
       <FrameCatalog frames={frames} />
-      <LensCatalog />
       <CustomerReviews />
       <LensWizardModal />
       <FloatingWhatsAppButton />

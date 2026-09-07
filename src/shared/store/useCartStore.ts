@@ -12,6 +12,7 @@ export interface CartItem {
     brandId: string;
     brandName: string;
     lensTypeName: string;
+    lensLevel?: string;
     indexValue: string;
     colorName?: string;
     coatingName?: string;

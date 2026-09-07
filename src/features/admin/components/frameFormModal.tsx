@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createFrame, updateFrame } from '@/app/actions/frameActions';
 import { uploadAndCompressImage } from '@/lib/uploadImage';
-import { Frame, MasterItem, AuthenticityTag, CreateFramePayload } from '@/shared/types/database';
+import { Frame, MasterItem, AuthenticityTag, CreateFramePayload, FrameBrand } from '@/shared/types/database';
 import { X, Upload, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -15,6 +15,7 @@ interface Props {
   categories: MasterItem[];
   materials: MasterItem[];
   authenticity: AuthenticityTag[];
+  brands?: FrameBrand[];
 }
 
 export default function FrameFormModal({
@@ -25,6 +26,7 @@ export default function FrameFormModal({
   categories,
   materials,
   authenticity,
+  brands = [],
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -32,6 +34,7 @@ export default function FrameFormModal({
 
   const [form, setForm] = useState({
     name: initialData?.name ?? '',
+    brand_id: initialData?.brand_id ?? '',
     category_id: initialData?.category_id ?? (categories[0]?.id ?? ''),
     material_id: initialData?.material_id ?? (materials[0]?.id ?? ''),
     authenticity_id: initialData?.authenticity_id ?? (authenticity[0]?.id ?? ''),
@@ -45,6 +48,7 @@ export default function FrameFormModal({
       setPreviewUrl(initialData?.image_url || '');
       setForm({
         name: initialData?.name ?? '',
+        brand_id: initialData?.brand_id ?? '',
         category_id: initialData?.category_id ?? (categories[0]?.id ?? ''),
         material_id: initialData?.material_id ?? (materials[0]?.id ?? ''),
         authenticity_id: initialData?.authenticity_id ?? (authenticity[0]?.id ?? ''),
@@ -52,7 +56,7 @@ export default function FrameFormModal({
         stock: initialData?.stock ?? '',
       });
     }
-  }, [isOpen, initialData, categories, materials, authenticity]);
+  }, [isOpen, initialData, categories, materials, authenticity, brands]);
 
   if (!isOpen) return null;
 
@@ -86,6 +90,7 @@ export default function FrameFormModal({
         price: Number(form.price),
         stock: Number(form.stock),
         image_url: imageUrl,
+        brand_id: form.brand_id || null,
         category_id: form.category_id || '',
         material_id: form.material_id || '',
         authenticity_id: form.authenticity_id || '',
@@ -121,15 +126,32 @@ export default function FrameFormModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-          <div>
-            <label className="block text-xs font-semibold text-stone-500 mb-1">Nama Frame</label>
-            <input
-              type="text"
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-stone-500 mb-1">Nama Frame</label>
+              <input
+                type="text"
+                required
+                placeholder="Misal: Aviator Classic"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-500 mb-1">Merek Frame</label>
+              <select
+                value={form.brand_id}
+                onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
+                className="w-full bg-cream-100 border border-cream-300 rounded-sm px-3 py-2 text-charcoal-900"
+              >
+                <option value="">-- Tanpa Merek / Custom --</option>
+                {brands.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
