@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
+import { getBaseUrl } from "@/lib/siteConfig";
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = getBaseUrl();
+
   return {
     rules: [
       {
@@ -9,6 +12,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/login/"],
       },
     ],
-    sitemap: "https://optikintercontinental.vercel.app/sitemap.xml",
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }

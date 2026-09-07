@@ -1,20 +1,15 @@
 import type { MetadataRoute } from "next";
-
-const SITE_URL = "https://optikintercontinental.vercel.app";
+import { getBaseUrl } from "@/lib/siteConfig";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = getBaseUrl();
+
   return [
     {
-      url: SITE_URL,
+      url: baseUrl,
       lastModified: new Date(),
       changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${SITE_URL}/home`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
+      priority: 1.0,
     },
   ];
 }

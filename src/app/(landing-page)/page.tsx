@@ -5,14 +5,14 @@ import HomeContainer from "@/features/landing-page/container/HomeContainer";
 export const metadata: Metadata = {
   title: "Beranda — Koleksi Kacamata & Lensa Premium",
   description:
-    "Jelajahi koleksi frame dan lensa kacamata terbaru di Optik Intercontinental. Temukan kacamata minus, plus, dan progresif dengan harga terjangkau.",
+    "Jelajahi koleksi frame dan lensa kacamata terbaru di Optik Intercontinental. Temukan kacamata minus, plus, dan progresif dengan harga terjangkau dan garansi keaslian.",
   alternates: {
-    canonical: "/home",
+    canonical: "/",
   },
 };
 
 export default async function Home() {
-    const frames = await getFrames();
+  const frames = await getFrames();
 
-    return <HomeContainer frames={frames} />
+  return <HomeContainer frames={frames} />;
 }
